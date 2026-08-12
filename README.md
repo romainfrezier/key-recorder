@@ -37,19 +37,19 @@ Key Recorder is a privacy-focused, open-source macOS application that allows you
 
 ### Requirements
 
-- macOS 13.0+ (Ventura or later)
+- macOS 15.1+
 - Swift 5.9+
 - Xcode 15.0+ (for building from source)
 
 ### Download Pre-built Release
 
-Download the latest release from the [Releases](https://github.com/romainfr/key-recorder/releases) page.
+Download the latest release from the [Releases](https://github.com/romainfrezier/key-recorder/releases) page.
 
 ### Build from Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/romainfr/key-recorder.git
+git clone https://github.com/romainfrezier/key-recorder.git
 cd key-recorder
 
 # Open in Xcode
@@ -238,7 +238,7 @@ This software is provided for educational and productivity research purposes onl
 
 <div align="center">
 
-**[🌟 Star this repo](https://github.com/romainfr/key-recorder)** if you find it useful!
+**[🌟 Star this repo](https://github.com/romainfrezier/key-recorder)** if you find it useful!
 
 Made with ❤️
 

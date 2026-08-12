@@ -42,14 +42,14 @@ Feature suggestions are welcome! Please provide:
 
 ### Prerequisites
 
-- macOS 13.0+
+- macOS 15.1+
 - Xcode 15.0+
 - Swift 5.9+
 
 ### Building
 
 ```bash
-git clone https://github.com/romainfr/key-recorder.git
+git clone https://github.com/romainfrezier/key-recorder.git
 cd key-recorder
 open key-recorder.xcodeproj
 ```
