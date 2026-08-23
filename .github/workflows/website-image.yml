@@ -3,7 +3,7 @@ name: Website image
 on:
   push:
     branches: [main]
-    tags: ['v*.*.*']
+    tags: ['v*.*.*', 'v*.*.*-site']
   pull_request:
     paths:
       - 'website/**'
@@ -84,6 +84,7 @@ jobs:
             type=sha,prefix=sha-
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
+            type=match,pattern=v(.*)-site,group=1
 
       - name: Build and push image
         uses: docker/build-push-action@v6
