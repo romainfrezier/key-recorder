@@ -50,7 +50,7 @@ private extension ContentView {
             .padding(.top, 12)
 
             TextField("Search sessions", text: $appState.sessionSearchText)
-                .accentTextField(appState.accentColor.color)
+                .textFieldStyle(.roundedBorder)
                 .padding(12)
 
             List(selection: $appState.selectedSessionID) {
@@ -282,7 +282,7 @@ private extension ContentView {
                         .foregroundStyle(.secondary)
 
                     TextField(defaultName, text: nameBinding)
-                        .accentTextField(appState.accentColor.color)
+                        .textFieldStyle(.roundedBorder)
                         .disabled(appState.isRecording)
                 }
 
@@ -293,7 +293,7 @@ private extension ContentView {
 
                     HStack {
                         TextField(defaultKey, text: keyBinding)
-                            .accentTextField(appState.accentColor.color)
+                            .textFieldStyle(.roundedBorder)
                             .frame(maxWidth: 100)
                             .disabled(appState.isRecording)
                         Button("Detect") { capture() }
@@ -311,7 +311,7 @@ private extension ContentView {
                 .foregroundStyle(.secondary)
 
             TextField(placeholder, text: text)
-                .accentTextField(appState.accentColor.color)
+                .textFieldStyle(.roundedBorder)
                 .disabled(appState.isRecording)
                 .frame(maxWidth: 180)
         }

@@ -65,29 +65,6 @@ enum AccentColor: String, CaseIterable, Identifiable {
     }
 }
 
-struct AccentTextFieldModifier: ViewModifier {
-    let color: Color
-
-    func body(content: Content) -> some View {
-        content
-            .textFieldStyle(.plain)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 6)
-            .background(Color(nsColor: .textBackgroundColor))
-            .clipShape(RoundedRectangle(cornerRadius: 7))
-            .overlay {
-                RoundedRectangle(cornerRadius: 7)
-                    .stroke(color.opacity(0.55), lineWidth: 1)
-            }
-            .tint(color)
-    }
-}
-
-extension View {
-    func accentTextField(_ color: Color) -> some View {
-        modifier(AccentTextFieldModifier(color: color))
-    }
-}
 
 // Import Core module types - they are part of the same target
 
