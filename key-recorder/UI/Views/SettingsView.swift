@@ -90,7 +90,7 @@ struct SettingsView: View {
                 Image("BMCButton")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 280)
+                    .frame(width: 150)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .accessibilityLabel("Buy me a coffee")
             }
