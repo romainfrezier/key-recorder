@@ -17,6 +17,12 @@
 "Choose CSV Location" = "Choisir l’emplacement du CSV";
 "Status" = "État";
 "Ready" = "Prêt";
+"Permissions look good ✅" = "Les autorisations sont correctes ✅";
+"Permissions granted ✅" = "Autorisations accordées ✅";
+"Accessibility" = "Accessibilité";
+"Input Monitoring" = "Surveillance de la saisie";
+"Grant %@ permissions in System Settings > Privacy & Security." = "Accordez les autorisations %@ dans Réglages Système > Confidentialité et sécurité.";
+" and " = " et ";
 "Start Recording" = "Démarrer l’enregistrement";
 "Stop Recording" = "Arrêter l’enregistrement";
 "Choose CSV Location…" = "Choisir l’emplacement du CSV…";

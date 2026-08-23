@@ -194,6 +194,7 @@ final class AppState: ObservableObject {
                 self?.receiveEvent(keyCode: keyCode, isDown: isDown)
             }
         }
+        statusMessage = localized("Ready")
         isLoadingSettings = false
     }
 
@@ -204,7 +205,7 @@ final class AppState: ObservableObject {
 
     func preparePermissionsPromptIfNeeded() {
         let state = PermissionManager.shared.checkPermissions(promptIfNeeded: true)
-        permissionMessage = state.message
+        permissionMessage = localizedPermissionMessage(state)
     }
 
     func openSettings() {
@@ -356,7 +357,7 @@ final class AppState: ObservableObject {
             isRecording = true
             remainingTime = config.duration
             statusMessage = "Recording..."
-            permissionMessage = "Permissions granted ✅"
+            permissionMessage = localized("Permissions granted ✅")
             liveKey1Duration = 0
             liveKey2Duration = 0
             newSession.start()
@@ -524,6 +525,27 @@ final class AppState: ObservableObject {
         defaults.set(durationText, forKey: DefaultsKey.duration)
         defaults.set(intervalText, forKey: DefaultsKey.interval)
         defaults.set(appearance.rawValue, forKey: DefaultsKey.appearance)
+    }
+
+    private func localized(_ key: String) -> String {
+        String(localized: String.LocalizationValue(key), locale: language.locale)
+    }
+
+    private func localizedPermissionMessage(_ state: PermissionState) -> String {
+        if state.allGranted {
+            return localized("Permissions look good ✅")
+        }
+
+        var missing: [String] = []
+        if state.accessibility != .granted {
+            missing.append(localized("Accessibility"))
+        }
+        if state.inputMonitoring != .granted {
+            missing.append(localized("Input Monitoring"))
+        }
+
+        let format = localized("Grant %@ permissions in System Settings > Privacy & Security.")
+        return String(format: format, missing.joined(separator: localized(" and ")))
     }
     
     func applyDurationPreset(_ value: Int) {

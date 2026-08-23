@@ -265,7 +265,7 @@ private extension ContentView {
         @ViewBuilder content: () -> Content
     ) -> some View {
         VStack(alignment: .leading, spacing: 14) {
-            Label(title, systemImage: systemImage)
+            Label(LocalizedStringKey(title), systemImage: systemImage)
                 .font(.headline)
 
             content()
@@ -285,7 +285,7 @@ private extension ContentView {
         capture: @escaping () -> Void
     ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.headline)
 
             HStack(alignment: .top, spacing: 12) {

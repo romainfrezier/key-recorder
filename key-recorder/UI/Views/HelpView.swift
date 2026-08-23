@@ -40,7 +40,7 @@ struct HelpView: View {
         @ViewBuilder content: () -> Content
     ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label(title, systemImage: systemImage)
+            Label(LocalizedStringKey(title), systemImage: systemImage)
                 .font(.headline)
             content()
                 .foregroundStyle(.secondary)
@@ -52,7 +52,7 @@ struct HelpView: View {
             Text(keys)
                 .font(.system(.body, design: .monospaced).weight(.semibold))
                 .frame(width: 46, alignment: .leading)
-            Text(description)
+            Text(LocalizedStringKey(description))
         }
     }
 }
