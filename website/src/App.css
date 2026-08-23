@@ -97,7 +97,9 @@ h2 { max-width: 520px; margin-bottom: 0; font-size: clamp(34px, 4vw, 52px); line
 .info-button { margin-top: 35px; }
 .language-landing { display: grid; min-height: 100vh; place-items: center; padding: 24px; }
 .landing-card { width: min(520px, 100%); padding: 42px; border: 1px solid var(--line); border-radius: 18px; background: #fff; box-shadow: 0 20px 55px rgb(31 43 58 / 10%); }
-.landing-card h1 { margin: 20px 0 30px; font-size: 50px; }
+.landing-card > .brand-mark { margin-bottom: 16px; }
+.landing-card .eyebrow { margin-bottom: 22px; }
+.landing-card h1 { margin: 0 0 38px; font-size: 50px; }
 .landing-options { display: grid; gap: 8px; }
 .landing-options button { display: flex; justify-content: space-between; width: 100%; padding: 16px 0; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--ink); font: inherit; font-weight: 700; text-align: left; cursor: pointer; }
 .landing-options button:hover { color: var(--red); }
