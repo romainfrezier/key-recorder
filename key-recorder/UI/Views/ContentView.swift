@@ -23,9 +23,6 @@ struct ContentView: View {
             }
         }
         .navigationSplitViewStyle(.balanced)
-        .sheet(isPresented: $appState.isHelpPresented) {
-            HelpView()
-        }
     }
 }
 
@@ -104,12 +101,18 @@ private extension ContentView {
                 .font(.callout)
                 .foregroundStyle(.secondary)
 
-            Button {
-                appState.isHelpPresented = true
-            } label: {
-                Label("How to use Key Recorder", systemImage: "questionmark.circle")
+            HStack(spacing: 14) {
+                SettingsLink {
+                    Label("Settings", systemImage: "gear")
+                }
+
+                Button {
+                    appState.openHelp()
+                } label: {
+                    Label("How to use Key Recorder", systemImage: "questionmark.circle")
+                }
+                .buttonStyle(.link)
             }
-            .buttonStyle(.link)
         }
     }
 

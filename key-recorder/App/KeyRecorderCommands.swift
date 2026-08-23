@@ -31,7 +31,7 @@ struct KeyRecorderCommands: Commands {
 
         CommandGroup(replacing: .help) {
             Button("Key Recorder Help") {
-                appState.isHelpPresented = true
+                appState.openHelp()
             }
             .keyboardShortcut("/", modifiers: .command)
         }

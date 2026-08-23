@@ -117,6 +117,10 @@ CSV interpretation, and troubleshooting.
 
 You can also use `⌘R` to start and `⌘.` to stop. `⌘,` opens Preferences, where you can configure the appearance and recording defaults. Stopping early exports a partial CSV with a `-partial` filename suffix.
 
+Preferences also lets you choose English, French, or Italian. The Settings button
+on the home screen opens Preferences directly, and **How to use Key Recorder**
+opens the Help tab there.
+
 Every completed session is also archived inside Key Recorder. Use the Sessions sidebar to search previous observations, review a CSV without opening a spreadsheet, edit experiment metadata, import an older CSV, or export another copy at any time.
 
 ### CSV Output Format

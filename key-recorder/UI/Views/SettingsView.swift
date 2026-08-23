@@ -4,19 +4,24 @@ struct SettingsView: View {
     @EnvironmentObject private var appState: AppState
 
     var body: some View {
-        TabView {
+        TabView(selection: $appState.settingsTab) {
             generalTab
                 .tabItem { Label("General", systemImage: "gear") }
+                .tag(SettingsTab.general)
 
             recordingTab
                 .tabItem { Label("Recording", systemImage: "record.circle") }
+                .tag(SettingsTab.recording)
 
             aboutTab
                 .tabItem { Label("About", systemImage: "info.circle") }
+                .tag(SettingsTab.about)
 
             HelpView()
                 .tabItem { Label("Help", systemImage: "questionmark.circle") }
+                .tag(SettingsTab.help)
         }
+        .environment(\.locale, appState.language.locale)
         .frame(width: 680, height: 480)
         .padding(20)
         .preferredColorScheme(appState.appearance.colorScheme)
@@ -26,7 +31,13 @@ struct SettingsView: View {
         Form {
             Picker("Appearance", selection: $appState.appearance) {
                 ForEach(AppearanceMode.allCases) { mode in
-                    Text(mode.title).tag(mode)
+                    Text(LocalizedStringKey(mode.title)).tag(mode)
+                }
+            }
+
+            Picker("Language", selection: $appState.language) {
+                ForEach(AppLanguage.allCases) { language in
+                    Text(language.title).tag(language)
                 }
             }
 

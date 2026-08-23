@@ -35,6 +35,41 @@ enum AppearanceMode: String, CaseIterable, Identifiable {
     }
 }
 
+enum AppLanguage: String, CaseIterable, Identifiable {
+    case english = "en"
+    case french = "fr"
+    case italian = "it"
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .english: return "English"
+        case .french: return "Français"
+        case .italian: return "Italiano"
+        }
+    }
+
+    var locale: Locale { Locale(identifier: rawValue) }
+
+    static var systemDefault: AppLanguage {
+        for identifier in Locale.preferredLanguages {
+            let languageCode = identifier.split(separator: "-").first.map(String.init) ?? identifier
+            if let language = AppLanguage(rawValue: languageCode) {
+                return language
+            }
+        }
+        return .english
+    }
+}
+
+enum SettingsTab: String, Hashable {
+    case general
+    case recording
+    case about
+    case help
+}
+
 
 // Import Core module types - they are part of the same target
 
@@ -67,6 +102,8 @@ final class AppState: ObservableObject {
     @Published var durationText: String = "10" { didSet { persist() } }
     @Published var intervalText: String = "2" { didSet { persist() } }
     @Published var appearance: AppearanceMode = .system { didSet { persist() } }
+    @Published var language: AppLanguage = .english { didSet { persist() } }
+    @Published var settingsTab: SettingsTab = .general
     @Published var liveKey1Duration: TimeInterval = 0
     @Published var liveKey2Duration: TimeInterval = 0
     @Published var csvURL: URL?
@@ -75,7 +112,6 @@ final class AppState: ObservableObject {
     @Published var remainingTime: TimeInterval = 0
     @Published var statusMessage: String = "Ready"
     @Published var permissionMessage: String = ""
-    @Published var isHelpPresented = false
     @Published var sessions: [SessionEntry] = []
     @Published var selectedSessionID: String?
     @Published var sessionSearchText = "" {
@@ -104,6 +140,7 @@ final class AppState: ObservableObject {
         static let duration = "duration"
         static let interval = "interval"
         static let appearance = "appearance"
+        static let language = "language"
         static let csvURL = "csvURL"
         static let key1Code = "key1Code"
         static let key2Code = "key2Code"
@@ -121,6 +158,9 @@ final class AppState: ObservableObject {
         if let rawAppearance = defaults.string(forKey: DefaultsKey.appearance) {
             appearance = AppearanceMode(rawValue: rawAppearance) ?? .system
         }
+        language = AppLanguage(
+            rawValue: defaults.string(forKey: DefaultsKey.language) ?? ""
+        ) ?? AppLanguage.systemDefault
         if let savedURL = defaults.url(forKey: DefaultsKey.csvURL) {
             csvURL = savedURL
         }
@@ -147,6 +187,15 @@ final class AppState: ObservableObject {
     func preparePermissionsPromptIfNeeded() {
         let state = PermissionManager.shared.checkPermissions(promptIfNeeded: true)
         permissionMessage = state.message
+    }
+
+    func openSettings() {
+        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+    }
+
+    func openHelp() {
+        settingsTab = .help
+        openSettings()
     }
 
     func chooseSaveLocation() {

@@ -29,13 +29,14 @@ Key Recorder keeps it in its local catalogue next to the archived CSV.
 
 1. Open Key Recorder.
 2. Open **Key Recorder → Preferences…** with `⌘,`.
-3. In **Recording**, choose the two keys and give them meaningful names such
+3. In **General**, choose English, French, or Italian if needed.
+4. In **Recording**, choose the two keys and give them meaningful names such
    as `Food dispenser` and `Lever`.
-4. Use **Detect…** if you are unsure which physical key macOS receives. This
+5. Use **Detect…** if you are unsure which physical key macOS receives. This
    is recommended for non-US keyboards.
-5. Set the duration and interval in seconds.
-6. In **General**, choose Automatic, Light, or Dark appearance if needed.
-7. Choose the CSV destination in the main window. This creates an external copy;
+6. Set the duration and interval in seconds.
+7. In **General**, choose Automatic, Light, or Dark appearance if needed.
+8. Choose the CSV destination in the main window. This creates an external copy;
    Key Recorder also keeps its own internal archive.
 
 The application remembers these choices for the next session. Use
