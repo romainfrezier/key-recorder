@@ -89,6 +89,9 @@ struct SettingsView: View {
                 .foregroundStyle(.secondary)
             Text("Version 1.1.0")
                 .font(.caption)
+            Link(destination: URL(string: "https://buymeacoffee.com/romainfrezier")!) {
+                Label("Buy me a coffee", systemImage: "cup.and.saucer")
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
