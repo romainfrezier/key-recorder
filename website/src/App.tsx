@@ -35,7 +35,7 @@ function Header({ locale }: { locale: Locale }) {
 
 function Footer({ locale }: { locale: Locale }) {
   const { t } = useTranslation()
-  return <footer className="site-footer"><div><div className="footer-brand"><img className="brand-mark" src={`${import.meta.env.BASE_URL}key-recorder-icon.png`} alt="" /> Key Recorder</div><p>{t('footer.tagline')}</p></div><div className="footer-links"><Link to={`/${locale}/researchers/`}>{t('nav.researchers')}</Link><Link to={`/${locale}/privacy/`}>{t('nav.privacy')}</Link><a href="https://github.com/romainfrezier/key-recorder" target="_blank" rel="noreferrer">GitHub ↗</a></div><div className="footer-note">{t('footer.license')}</div></footer>
+  return <footer className="site-footer"><div><div className="footer-brand"><img className="brand-mark" src={`${import.meta.env.BASE_URL}key-recorder-icon.png`} alt="" /> Key Recorder</div><p>{t('footer.tagline')}</p></div><div className="footer-links"><Link to={`/${locale}/researchers/`}>{t('nav.researchers')}</Link><Link to={`/${locale}/privacy/`}>{t('nav.privacy')}</Link><a href="https://github.com/romainfrezier/key-recorder" target="_blank" rel="noreferrer">GitHub ↗</a><a className="support-link" href="https://buymeacoffee.com/romainfrezier" target="_blank" rel="noreferrer">{t('footer.support')} ↗</a></div><div className="footer-note">{t('footer.license')}</div></footer>
 }
 
 function HomePage({ locale }: { locale: Locale }) {
