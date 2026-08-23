@@ -4,9 +4,6 @@ struct HelpView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                Text("Key Recorder Help")
-                    .font(.title.bold())
-
                 helpSection("Start an observation", systemImage: "play.circle") {
                     Text("Choose two event keys, give them meaningful names, set the duration and interval, then press Start Recording. Hold each key while its event is happening and release it when the event ends.")
                 }
@@ -32,9 +29,9 @@ struct HelpView: View {
                 }
             }
             .padding(24)
-            .frame(maxWidth: 680, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(minWidth: 560, minHeight: 500)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func helpSection<Content: View>(

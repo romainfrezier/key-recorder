@@ -17,7 +17,7 @@ struct SettingsView: View {
             HelpView()
                 .tabItem { Label("Help", systemImage: "questionmark.circle") }
         }
-        .frame(width: 520, height: 360)
+        .frame(width: 680, height: 560)
         .padding(20)
     }
 
@@ -26,6 +26,15 @@ struct SettingsView: View {
             Picker("Appearance", selection: $appState.appearance) {
                 ForEach(AppearanceMode.allCases) { mode in
                     Text(mode.title).tag(mode)
+                }
+            }
+
+            Picker("Accent Color", selection: $appState.accentColor) {
+                ForEach(AccentColor.allCases) { color in
+                    Label(color.title, systemImage: "circle.fill")
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(color.color)
+                        .tag(color)
                 }
             }
 
@@ -47,6 +56,10 @@ struct SettingsView: View {
         Form {
             TextField("Duration (seconds)", text: $appState.durationText)
             TextField("Interval (seconds)", text: $appState.intervalText)
+
+            Text("These are the default values used when starting a new recording. You can change them here or before each observation.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
 
             keySetting(title: "Key 1", name: $appState.key1Name, text: appState.key1Text) {
                 appState.captureKey1()
