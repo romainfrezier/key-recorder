@@ -57,7 +57,7 @@ final class KeyboardMonitor {
         let refcon = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
 
         guard let tap = CGEvent.tapCreate(
-            tap: .cghidEventTap,
+            tap: .cgSessionEventTap,
             place: .headInsertEventTap,
             options: .listenOnly, // Safer option
             eventsOfInterest: CGEventMask(events),

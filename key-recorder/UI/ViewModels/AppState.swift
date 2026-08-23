@@ -552,9 +552,6 @@ final class AppState: ObservableObject {
         }
 
         var missing: [String] = []
-        if state.accessibility != .granted {
-            missing.append(localized("Accessibility"))
-        }
         if state.inputMonitoring != .granted {
             missing.append(localized("Input Monitoring"))
         }

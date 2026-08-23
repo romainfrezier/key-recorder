@@ -78,6 +78,26 @@ final class PermissionManager {
             _ = IOHIDRequestAccess(kIOHIDRequestTypeListenEvent)
         }
 
-        return CGPreflightListenEventAccess() ? .granted : .denied
+        // Check the exact capability used by KeyboardMonitor. The preflight
+        // API can remain false for an already-listed app on newer macOS
+        // versions, while a real passive event tap is usable.
+        let events = CGEventMask(
+            (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue)
+        )
+        let testTap = CGEvent.tapCreate(
+            tap: .cgSessionEventTap,
+            place: .headInsertEventTap,
+            options: .listenOnly,
+            eventsOfInterest: events,
+            callback: { _, _, event, _ in
+                Unmanaged.passUnretained(event)
+            },
+            userInfo: nil
+        )
+
+        guard let testTap else { return .denied }
+        CGEvent.tapEnable(tap: testTap, enable: false)
+        CFMachPortInvalidate(testTap)
+        return .granted
     }
 }
