@@ -9,7 +9,7 @@ struct HelpView: View {
                 }
 
                 helpSection("Permissions", systemImage: "lock.shield") {
-                    Text("macOS asks for Accessibility and Input Monitoring so Key Recorder can receive the two selected keys outside its own window. The app records only those keys during an active session and keeps the CSV on this Mac.")
+                    Text("macOS asks for Input Monitoring so Key Recorder can receive the two selected keys outside its own window. Accessibility is not required because the app only listens and never changes keyboard events. The app records only those keys during an active session and keeps the CSV on this Mac.")
                 }
 
                 helpSection("Shortcuts", systemImage: "command") {

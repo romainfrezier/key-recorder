@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-08-23
+
+### Fixed
+- Use Apple's native HID permission request flow for Input Monitoring
+- Allow passive keyboard recording without requiring Accessibility permission
+- Update the in-app permissions help text to match the actual macOS requirement
+
 ## [1.1.1] - 2026-08-23
 
 ### Fixed
@@ -51,7 +58,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Transparent permission system
 - Thread-safe event processing
 
-[Unreleased]: https://github.com/romainfrezier/key-recorder/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/romainfrezier/key-recorder/compare/v1.1.2...HEAD
+[1.1.2]: https://github.com/romainfrezier/key-recorder/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/romainfrezier/key-recorder/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/romainfrezier/key-recorder/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/romainfrezier/key-recorder/releases/tag/v1.0.0

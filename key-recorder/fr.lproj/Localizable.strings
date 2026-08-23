@@ -52,7 +52,7 @@
 "Understand the CSV" = "Comprendre le CSV";
 "For a research protocol" = "Pour un protocole de recherche";
 "Choose two event keys, give them meaningful names, set the duration and interval, then press Start Recording. Hold each key while its event is happening and release it when the event ends." = "Choisissez deux touches d’événement, donnez-leur des noms explicites, définissez la durée et l’intervalle, puis cliquez sur Démarrer l’enregistrement. Maintenez chaque touche pendant l’événement et relâchez-la lorsqu’il se termine.";
-"macOS asks for Accessibility and Input Monitoring so Key Recorder can receive the two selected keys outside its own window. The app records only those keys during an active session and keeps the CSV on this Mac." = "macOS demande les autorisations Accessibilité et Surveillance de la saisie pour que Key Recorder reçoive les deux touches sélectionnées en dehors de sa fenêtre. L’app n’enregistre que ces touches pendant une session active et conserve le CSV sur ce Mac.";
+"macOS asks for Input Monitoring so Key Recorder can receive the two selected keys outside its own window. Accessibility is not required because the app only listens and never changes keyboard events. The app records only those keys during an active session and keeps the CSV on this Mac." = "macOS demande l’autorisation Surveillance de la saisie pour que Key Recorder reçoive les deux touches sélectionnées en dehors de sa fenêtre. L’autorisation Accessibilité n’est pas nécessaire car l’app écoute uniquement les événements sans les modifier. L’app n’enregistre que ces touches pendant une session active et conserve le CSV sur ce Mac.";
 "Start recording" = "Démarrer l’enregistrement";
 "Stop and export the partial session" = "Arrêter et exporter la session partielle";
 "Open Preferences" = "Ouvrir les réglages";
@@ -64,6 +64,6 @@
 "Interval cannot be greater than duration." = "L’intervalle ne peut pas être supérieur à la durée.";
 "Accessibility permission is missing. Open System Settings > Privacy & Security > Accessibility." = "L’autorisation Accessibilité manque. Ouvrez Réglages Système > Confidentialité et sécurité > Accessibilité.";
 "Input Monitoring permission is missing. Open System Settings > Privacy & Security > Input Monitoring." = "L’autorisation Surveillance de la saisie manque. Ouvrez Réglages Système > Confidentialité et sécurité > Surveillance de la saisie.";
-"Unable to create CGEvent tap. Check Accessibility/Input Monitoring permissions." = "Impossible de créer le tap CGEvent. Vérifiez les autorisations Accessibilité et Surveillance de la saisie.";
+"Unable to create CGEvent tap. Check Input Monitoring permission." = "Impossible de créer le tap CGEvent. Vérifiez l’autorisation Surveillance de la saisie.";
 "Cannot start: %@" = "Impossible de démarrer : %@";
 "Cannot capture key: %@" = "Impossible de détecter la touche : %@";

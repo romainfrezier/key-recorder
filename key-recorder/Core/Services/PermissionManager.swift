@@ -8,6 +8,7 @@
 import Foundation
 import ApplicationServices
 import CoreGraphics
+import IOKit.hid
 
 enum PermissionStatus {
     case granted
@@ -20,7 +21,9 @@ struct PermissionState {
     let inputMonitoring: PermissionStatus
     
     var allGranted: Bool {
-        accessibility == .granted && inputMonitoring == .granted
+        // Key Recorder only listens to key events and never posts or modifies them.
+        // Input Monitoring is therefore the only permission required to record.
+        inputMonitoring == .granted
     }
     
     var message: String {
@@ -29,9 +32,6 @@ struct PermissionState {
         }
         
         var missing: [String] = []
-        if accessibility != .granted {
-            missing.append("Accessibility")
-        }
         if inputMonitoring != .granted {
             missing.append("Input Monitoring")
         }
@@ -58,10 +58,6 @@ final class PermissionManager {
     func ensureAllPermissions() throws {
         let state = checkPermissions(promptIfNeeded: false)
         
-        guard state.accessibility == .granted else {
-            throw AppError.accessibilityPermissionMissing
-        }
-        
         guard state.inputMonitoring == .granted else {
             throw AppError.inputMonitoringPermissionMissing
         }
@@ -77,7 +73,9 @@ final class PermissionManager {
     
     private func checkInputMonitoring(promptIfNeeded: Bool) -> PermissionStatus {
         if promptIfNeeded {
-            _ = CGRequestListenEventAccess()
+            // This is the native macOS API that registers the app in
+            // Privacy & Security > Input Monitoring.
+            _ = IOHIDRequestAccess(kIOHIDRequestTypeListenEvent)
         }
 
         return CGPreflightListenEventAccess() ? .granted : .denied

@@ -58,7 +58,7 @@ enum MonitorError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .failedToCreateEventTap:
-            return "Unable to create CGEvent tap. Check Accessibility/Input Monitoring permissions."
+            return "Unable to create CGEvent tap. Check Input Monitoring permission."
         }
     }
 }
