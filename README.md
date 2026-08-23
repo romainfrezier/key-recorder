@@ -8,9 +8,11 @@
 
 **A macOS utility to measure keyboard usage patterns for productivity analysis**
 
-<a href="https://buymeacoffee.com/romainfrezier">
-  <img src="docs/bmc-button.png" alt="Buy Me a Coffee" width="300">
-</a>
+<p align="center" style="margin: 16px 0;">
+  <a href="https://buymeacoffee.com/romainfrezier">
+    <img src="docs/bmc-button.png" alt="Buy Me a Coffee" width="220">
+  </a>
+</p>
 
 [Features](#features) • [Installation](#installation) • [Usage](#usage) • [Privacy](#privacy--security) • [Contribute](#contributing)
 
