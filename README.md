@@ -10,7 +10,7 @@
 
 <p align="center" style="margin: 16px 0;">
   <a href="https://buymeacoffee.com/romainfrezier">
-    <img src="docs/bmc-button.png" alt="Buy Me a Coffee" width="220">
+    <img src="docs/bmc-button.png" alt="Buy Me a Coffee" width="100">
   </a>
 </p>
 
