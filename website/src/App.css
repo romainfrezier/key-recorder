@@ -77,6 +77,7 @@ h2 { max-width: 520px; margin-bottom: 0; font-size: clamp(34px, 4vw, 52px); line
 .site-footer { display: grid; grid-template-columns: 1fr auto auto; gap: 35px; align-items: end; padding: 42px 0 48px; color: var(--muted); font-size: 12px; }
 .site-footer p { margin: 12px 0 0; }
 .footer-links { display: flex; gap: 18px; }
+.support-link { color: var(--red); font-weight: 700; }
 .footer-note { text-align: right; }
 .info-page { padding: 80px 0 110px; }
 .info-page h1 { max-width: 720px; margin-bottom: 20px; }
