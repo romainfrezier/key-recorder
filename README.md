@@ -238,6 +238,10 @@ Contributions are welcome! Please see our [Contributing Guidelines](CONTRIBUTING
 - 🧪 Unit tests coverage
 - 📖 Documentation improvements
 
+## ☕ Support
+
+If Key Recorder is useful to you, you can [buy me a coffee](https://buymeacoffee.com/romainfrezier).
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
