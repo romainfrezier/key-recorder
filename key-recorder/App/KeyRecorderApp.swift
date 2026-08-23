@@ -21,6 +21,7 @@ struct KeyRecorderApp: App {
                 .frame(minWidth: 520, minHeight: 420)
                 .preferredColorScheme(appState.appearance.colorScheme)
                 .tint(appState.accentColor.color)
+                .accentColor(appState.accentColor.color)
                 .onAppear {
                     appDelegate.appState = appState
                     appState.preparePermissionsPromptIfNeeded()
@@ -35,6 +36,7 @@ struct KeyRecorderApp: App {
                 .environmentObject(appState)
                 .preferredColorScheme(appState.appearance.colorScheme)
                 .tint(appState.accentColor.color)
+                .accentColor(appState.accentColor.color)
         }
     }
 }

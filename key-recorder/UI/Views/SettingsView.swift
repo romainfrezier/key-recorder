@@ -19,7 +19,9 @@ struct SettingsView: View {
         }
         .frame(width: 680, height: 480)
         .padding(20)
+        .preferredColorScheme(appState.appearance.colorScheme)
         .tint(appState.accentColor.color)
+        .accentColor(appState.accentColor.color)
     }
 
     private var generalTab: some View {
@@ -30,15 +32,32 @@ struct SettingsView: View {
                 }
             }
 
-            Picker("Accent Color", selection: $appState.accentColor) {
-                ForEach(AccentColor.allCases) { color in
-                    HStack(spacing: 8) {
-                        Circle()
-                            .fill(color.color)
-                            .frame(width: 10, height: 10)
-                        Text(color.title)
+            HStack {
+                Text("Accent Color")
+                Spacer()
+                Menu {
+                    ForEach(AccentColor.allCases) { color in
+                        Button {
+                            appState.accentColor = color
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "circle.fill")
+                                    .foregroundColor(color.color)
+                                    .font(.system(size: 10))
+                                Text(color.title)
+                                if color == appState.accentColor {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
                     }
-                        .tag(color)
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "circle.fill")
+                            .foregroundColor(appState.accentColor.color)
+                            .font(.system(size: 10))
+                        Text(appState.accentColor.title)
+                    }
                 }
             }
 
