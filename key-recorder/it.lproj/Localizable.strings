@@ -58,3 +58,12 @@
 "Open Preferences" = "Apri impostazioni";
 "Each row is an analysis interval. Values are durations in seconds, not interaction counts. TOTAL adds the durations for each configured key. A filename ending in -partial means the observation was stopped before its planned duration." = "Ogni riga è un intervallo di analisi. I valori sono durate in secondi, non conteggi di interazioni. TOTAL somma le durate di ogni tasto configurato. Un nome che termina con -partial indica che l’osservazione è stata interrotta prima della durata prevista.";
 "Keep the experiment identifier, operator, subject or sample identifier, key definitions, duration, interval, and any interruption note with the exported CSV. Key Recorder stores measurements, not your experimental metadata." = "Conserva con il CSV esportato l’identificativo dell’esperimento, l’operatore, il soggetto o campione, la definizione dei tasti, durata, intervallo e note sulle interruzioni. Key Recorder memorizza le misure, non i metadati sperimentali.";
+"Please enter two simple supported keys (example: a, b, 1)." = "Inserisci due tasti semplici supportati (ad esempio: a, b, 1).";
+"Duration must be a positive number." = "La durata deve essere un numero positivo.";
+"Interval must be a positive number." = "L’intervallo deve essere un numero positivo.";
+"Interval cannot be greater than duration." = "L’intervallo non può essere maggiore della durata.";
+"Accessibility permission is missing. Open System Settings > Privacy & Security > Accessibility." = "Manca l’autorizzazione Accessibilità. Apri Impostazioni di Sistema > Privacy e sicurezza > Accessibilità.";
+"Input Monitoring permission is missing. Open System Settings > Privacy & Security > Input Monitoring." = "Manca l’autorizzazione Monitoraggio input. Apri Impostazioni di Sistema > Privacy e sicurezza > Monitoraggio input.";
+"Unable to create CGEvent tap. Check Accessibility/Input Monitoring permissions." = "Impossibile creare il tap CGEvent. Controlla le autorizzazioni Accessibilità e Monitoraggio input.";
+"Cannot start: %@" = "Impossibile avviare: %@";
+"Cannot capture key: %@" = "Impossibile rilevare il tasto: %@";

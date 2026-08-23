@@ -208,6 +208,11 @@ final class AppState: ObservableObject {
         permissionMessage = localizedPermissionMessage(state)
     }
 
+    func refreshPermissions() {
+        let state = PermissionManager.shared.checkPermissions(promptIfNeeded: false)
+        permissionMessage = localizedPermissionMessage(state)
+    }
+
     func openSettings() {
         NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
     }
@@ -362,7 +367,7 @@ final class AppState: ObservableObject {
             liveKey2Duration = 0
             newSession.start()
         } catch {
-            statusMessage = "Cannot start: \(error.localizedDescription)"
+            statusMessage = String(format: localized("Cannot start: %@"), localizedErrorMessage(error))
         }
     }
 
@@ -432,7 +437,7 @@ final class AppState: ObservableObject {
             try monitor.start()
         } catch {
             capturingKeyTarget = nil
-            statusMessage = "Cannot capture key: \(error.localizedDescription)"
+            statusMessage = String(format: localized("Cannot capture key: %@"), localizedErrorMessage(error))
         }
     }
 
@@ -529,6 +534,16 @@ final class AppState: ObservableObject {
 
     private func localized(_ key: String) -> String {
         String(localized: String.LocalizationValue(key), locale: language.locale)
+    }
+
+    private func localizedErrorMessage(_ error: Error) -> String {
+        if let appError = error as? AppError {
+            return localized(appError.localizationKey)
+        }
+        if let monitorError = error as? MonitorError {
+            return localized(monitorError.localizationKey)
+        }
+        return localized(error.localizedDescription)
     }
 
     private func localizedPermissionMessage(_ state: PermissionState) -> String {

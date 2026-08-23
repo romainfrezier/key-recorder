@@ -16,6 +16,18 @@ enum AppError: LocalizedError {
     case inputMonitoringPermissionMissing
     case recordingFailed(String)
 
+    var localizationKey: String {
+        switch self {
+        case .invalidKey: return "Please enter two simple supported keys (example: a, b, 1)."
+        case .invalidDuration: return "Duration must be a positive number."
+        case .invalidInterval: return "Interval must be a positive number."
+        case .intervalGreaterThanDuration: return "Interval cannot be greater than duration."
+        case .accessibilityPermissionMissing: return "Accessibility permission is missing. Open System Settings > Privacy & Security > Accessibility."
+        case .inputMonitoringPermissionMissing: return "Input Monitoring permission is missing. Open System Settings > Privacy & Security > Input Monitoring."
+        case .recordingFailed: return "Recording failed"
+        }
+    }
+
     var errorDescription: String? {
         switch self {
         case .invalidKey:
@@ -38,6 +50,10 @@ enum AppError: LocalizedError {
 
 enum MonitorError: LocalizedError {
     case failedToCreateEventTap
+
+    var localizationKey: String {
+        "Unable to create CGEvent tap. Check Accessibility/Input Monitoring permissions."
+    }
 
     var errorDescription: String? {
         switch self {

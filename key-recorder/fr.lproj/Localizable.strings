@@ -58,3 +58,12 @@
 "Open Preferences" = "Ouvrir les réglages";
 "Each row is an analysis interval. Values are durations in seconds, not interaction counts. TOTAL adds the durations for each configured key. A filename ending in -partial means the observation was stopped before its planned duration." = "Chaque ligne correspond à un intervalle d’analyse. Les valeurs sont des durées en secondes, pas des nombres d’interactions. TOTAL additionne les durées de chaque touche. Un nom de fichier se terminant par -partial indique que l’observation s’est arrêtée avant la durée prévue.";
 "Keep the experiment identifier, operator, subject or sample identifier, key definitions, duration, interval, and any interruption note with the exported CSV. Key Recorder stores measurements, not your experimental metadata." = "Conservez avec le CSV exporté l’identifiant de l’expérience, l’opérateur, le sujet ou l’échantillon, la définition des touches, la durée, l’intervalle et toute note d’interruption. Key Recorder stocke les mesures, pas vos métadonnées expérimentales.";
+"Please enter two simple supported keys (example: a, b, 1)." = "Saisissez deux touches simples prises en charge (par exemple : a, b, 1).";
+"Duration must be a positive number." = "La durée doit être un nombre positif.";
+"Interval must be a positive number." = "L’intervalle doit être un nombre positif.";
+"Interval cannot be greater than duration." = "L’intervalle ne peut pas être supérieur à la durée.";
+"Accessibility permission is missing. Open System Settings > Privacy & Security > Accessibility." = "L’autorisation Accessibilité manque. Ouvrez Réglages Système > Confidentialité et sécurité > Accessibilité.";
+"Input Monitoring permission is missing. Open System Settings > Privacy & Security > Input Monitoring." = "L’autorisation Surveillance de la saisie manque. Ouvrez Réglages Système > Confidentialité et sécurité > Surveillance de la saisie.";
+"Unable to create CGEvent tap. Check Accessibility/Input Monitoring permissions." = "Impossible de créer le tap CGEvent. Vérifiez les autorisations Accessibilité et Surveillance de la saisie.";
+"Cannot start: %@" = "Impossible de démarrer : %@";
+"Cannot capture key: %@" = "Impossible de détecter la touche : %@";

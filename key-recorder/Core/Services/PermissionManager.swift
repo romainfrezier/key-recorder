@@ -76,31 +76,10 @@ final class PermissionManager {
     }
     
     private func checkInputMonitoring(promptIfNeeded: Bool) -> PermissionStatus {
-        // Input Monitoring is checked by attempting to create a tap
-        // If we can create one, we have the permission
-        let testTap = CGEvent.tapCreate(
-            tap: .cghidEventTap,
-            place: .headInsertEventTap,
-            options: .defaultTap,
-            eventsOfInterest: 0,
-            callback: { _, _, event, _ in
-                return Unmanaged.passUnretained(event)
-            },
-            userInfo: nil
-        )
-        
-        if let tap = testTap {
-            CGEvent.tapEnable(tap: tap, enable: false)
-            CFMachPortInvalidate(tap)
-            return .granted
-        }
-        
-        // Permission denied
         if promptIfNeeded {
-            // Trigger the system permission prompt
-            _ = IOHIDRequestAccess(kIOHIDRequestTypeListenEvent)
+            _ = CGRequestListenEventAccess()
         }
-        
-        return .denied
+
+        return CGPreflightListenEventAccess() ? .granted : .denied
     }
 }
