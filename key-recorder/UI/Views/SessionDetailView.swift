@@ -66,13 +66,20 @@ struct SessionDetailView: View {
         GroupBox("Session details") {
             VStack(alignment: .leading, spacing: 10) {
                 TextField("Title", text: $draft.title)
+                    .accentTextField(appState.accentColor.color)
                 TextField("Experiment ID", text: $draft.experimentID)
+                    .accentTextField(appState.accentColor.color)
                 TextField("Subject or sample", text: $draft.subject)
+                    .accentTextField(appState.accentColor.color)
                 TextField("Operator", text: $draft.operatorName)
+                    .accentTextField(appState.accentColor.color)
                 TextField("Protocol", text: $draft.protocolName)
+                    .accentTextField(appState.accentColor.color)
                 TextField("Tags", text: $draft.tags)
+                    .accentTextField(appState.accentColor.color)
                 TextField("Notes", text: $draft.notes, axis: .vertical)
                     .lineLimit(3...6)
+                    .accentTextField(appState.accentColor.color)
 
                 HStack {
                     Button("Save details") {
