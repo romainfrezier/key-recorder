@@ -17,8 +17,9 @@ struct SettingsView: View {
             HelpView()
                 .tabItem { Label("Help", systemImage: "questionmark.circle") }
         }
-        .frame(width: 680, height: 560)
+        .frame(width: 680, height: 480)
         .padding(20)
+        .tint(appState.accentColor.color)
     }
 
     private var generalTab: some View {
@@ -31,9 +32,12 @@ struct SettingsView: View {
 
             Picker("Accent Color", selection: $appState.accentColor) {
                 ForEach(AccentColor.allCases) { color in
-                    Label(color.title, systemImage: "circle.fill")
-                        .symbolRenderingMode(.palette)
-                        .foregroundStyle(color.color)
+                    HStack(spacing: 8) {
+                        Circle()
+                            .fill(color.color)
+                            .frame(width: 10, height: 10)
+                        Text(color.title)
+                    }
                         .tag(color)
                 }
             }
