@@ -1,0 +1,16 @@
+name: Quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        run: xcodebuild test -project key-recorder.xcodeproj -scheme key-recorder -destination 'platform=macOS' -only-testing:key-recorderTests -parallel-testing-enabled NO
+      - name: Build unsigned app
+        run: xcodebuild build -project key-recorder.xcodeproj -scheme key-recorder -configuration Release -sdk macosx CODE_SIGNING_ALLOWED=NO

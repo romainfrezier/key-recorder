@@ -13,6 +13,74 @@ struct ContentView: View {
     @EnvironmentObject private var appState: AppState
 
     var body: some View {
+        NavigationSplitView {
+            sessionSidebar
+        } detail: {
+            if let selectedSession = appState.selectedSession {
+                SessionDetailView(session: selectedSession)
+            } else {
+                recordingWorkspace
+            }
+        }
+        .navigationSplitViewStyle(.balanced)
+        .sheet(isPresented: $appState.isHelpPresented) {
+            HelpView()
+        }
+    }
+}
+
+// MARK: - Sections
+
+private extension ContentView {
+    var sessionSidebar: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text("Sessions")
+                    .font(.headline)
+                Spacer()
+                Button {
+                    appState.importSession()
+                } label: {
+                    Label("Import CSV", systemImage: "square.and.arrow.down")
+                }
+                .labelStyle(.iconOnly)
+                .help("Import a CSV into the local archive")
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 12)
+
+            TextField("Search sessions", text: $appState.sessionSearchText)
+                .textFieldStyle(.roundedBorder)
+                .padding(12)
+
+            List(selection: $appState.selectedSessionID) {
+                ForEach(appState.sessions) { session in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(session.title.isEmpty ? "Untitled session" : session.title)
+                            .lineLimit(1)
+                        HStack {
+                            Text(session.createdAt.formatted(date: .abbreviated, time: .omitted))
+                            if !session.subject.isEmpty {
+                                Text("• \(session.subject)")
+                            }
+                        }
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    }
+                    .tag(session.id)
+                }
+            }
+
+            Divider()
+            Button("New recording") {
+                appState.selectedSessionID = nil
+            }
+            .padding(10)
+        }
+        .navigationSplitViewColumnWidth(min: 240, ideal: 280)
+    }
+
+    var recordingWorkspace: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 headerSection
@@ -26,11 +94,7 @@ struct ContentView: View {
         }
         .background(Color(nsColor: .windowBackgroundColor))
     }
-}
 
-// MARK: - Sections
-
-private extension ContentView {
     var headerSection: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Key Recorder")
@@ -39,6 +103,13 @@ private extension ContentView {
             Text("Record global keyboard activity and export the result to CSV.")
                 .font(.callout)
                 .foregroundStyle(.secondary)
+
+            Button {
+                appState.isHelpPresented = true
+            } label: {
+                Label("How to use Key Recorder", systemImage: "questionmark.circle")
+            }
+            .buttonStyle(.link)
         }
     }
 
@@ -50,7 +121,8 @@ private extension ContentView {
                     nameBinding: $appState.key1Name,
                     keyBinding: $appState.key1Text,
                     defaultName: "Key 1",
-                    defaultKey: "a"
+                    defaultKey: "a",
+                    capture: appState.captureKey1
                 )
 
                 Divider()
@@ -60,7 +132,8 @@ private extension ContentView {
                     nameBinding: $appState.key2Name,
                     keyBinding: $appState.key2Text,
                     defaultName: "Key 2",
-                    defaultKey: "b"
+                    defaultKey: "b",
+                    capture: appState.captureKey2
                 )
 
                 Divider()
@@ -153,16 +226,19 @@ private extension ContentView {
             Spacer()
 
             Button {
-                appState.startRecording()
+                if appState.isRecording {
+                    appState.stopRecording()
+                } else {
+                    appState.startRecording()
+                }
             } label: {
-                Label(appState.isRecording ? "Recording..." : "Start Recording", systemImage: "record.circle")
+                Label(appState.isRecording ? "Stop Recording" : "Start Recording", systemImage: appState.isRecording ? "stop.circle" : "record.circle")
                     .font(.headline)
                     .frame(minWidth: 180)
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
             .keyboardShortcut(.defaultAction)
-            .disabled(appState.isRecording)
         }
     }
 }
@@ -192,7 +268,8 @@ private extension ContentView {
         nameBinding: Binding<String>,
         keyBinding: Binding<String>,
         defaultName: String,
-        defaultKey: String
+        defaultKey: String,
+        capture: @escaping () -> Void
     ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
@@ -214,10 +291,14 @@ private extension ContentView {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
-                    TextField(defaultKey, text: keyBinding)
-                        .textFieldStyle(.roundedBorder)
-                        .frame(maxWidth: 100)
-                        .disabled(appState.isRecording)
+                    HStack {
+                        TextField(defaultKey, text: keyBinding)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(maxWidth: 100)
+                            .disabled(appState.isRecording)
+                        Button("Detect") { capture() }
+                            .disabled(appState.isRecording)
+                    }
                 }
             }
         }

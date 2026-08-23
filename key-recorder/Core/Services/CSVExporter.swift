@@ -82,8 +82,8 @@ enum CSVExporter {
     }
     
     private static func buildCSV(records: [IntervalRecord], config: RecordingConfig) -> String {
-        let key1Header = sanitizeHeader(config.key1Name)
-        let key2Header = sanitizeHeader(config.key2Name)
+        let key1Header = escapeCSV(config.key1Name)
+        let key2Header = escapeCSV(config.key2Name)
         
         var csv = "interval,\(key1Header),\(key2Header)\n"
         
@@ -101,8 +101,8 @@ enum CSVExporter {
             
             csv += [
                 intervalLabel,
-                String(format: "%.3f", record.key1Duration),
-                String(format: "%.3f", record.key2Duration)
+                formatNumber(record.key1Duration),
+                formatNumber(record.key2Duration)
             ].joined(separator: ",") + "\n"
         }
         
@@ -111,18 +111,21 @@ enum CSVExporter {
         
         csv += "\n"
         csv += "TOTAL,"
-        csv += String(format: "%.3f", totalKey1)
+        csv += formatNumber(totalKey1)
         csv += ","
-        csv += String(format: "%.3f", totalKey2)
+        csv += formatNumber(totalKey2)
         csv += "\n"
         
         return csv
     }
     
-    private static func sanitizeHeader(_ header: String) -> String {
-        return header
-            .replacingOccurrences(of: ",", with: "_")
-            .replacingOccurrences(of: "\n", with: " ")
-            .replacingOccurrences(of: "\r", with: " ")
+    private static func escapeCSV(_ value: String) -> String {
+        let escaped = value.replacingOccurrences(of: "\"", with: "\"\"")
+        guard escaped.contains(where: { ",\n\r\"".contains($0) }) else { return escaped }
+        return "\"\(escaped)\""
+    }
+
+    private static func formatNumber(_ value: TimeInterval) -> String {
+        String(format: "%.3f", locale: Locale(identifier: "en_US_POSIX"), value)
     }
 }

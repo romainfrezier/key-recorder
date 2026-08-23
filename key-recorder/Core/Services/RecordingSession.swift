@@ -11,9 +11,10 @@ import CoreGraphics
 // Import models from the same module (Core/Models)
 // They're part of the same target, so no explicit import needed
 
+@MainActor
 final class RecordingSession {
     var onTick: ((TimeInterval) -> Void)?
-    var onFinished: ((Result<Void, Error>) -> Void)?
+    var onFinished: ((Result<URL, Error>) -> Void)?
     var onLiveUpdate: ((TimeInterval, TimeInterval) -> Void)?
 
     private let config: RecordingConfig
@@ -35,6 +36,7 @@ final class RecordingSession {
     private var key1Durations: [TimeInterval] = []
     private var key2Durations: [TimeInterval] = []
     private var intervalCount: Int = 0
+    private var didFinish = false
 
     init(config: RecordingConfig, outputURL: URL) {
         self.config = config
@@ -52,16 +54,19 @@ final class RecordingSession {
         key2PressStart = nil
         key1IsDown = false
         key2IsDown = false
+        didFinish = false
 
         let timer = Timer(timeInterval: 0.1, repeats: true) { [weak self] _ in
-            self?.tick()
+            Task { @MainActor [weak self] in
+                self?.tick()
+            }
         }
         RunLoop.main.add(timer, forMode: .common)
         self.timer = timer
     }
 
     func handleEvent(keyCode: CGKeyCode, isDown: Bool) {
-        guard let startDate, let endDate else { return }
+        guard !didFinish, let startDate, let endDate else { return }
 
         let now = Date()
 
@@ -110,7 +115,7 @@ final class RecordingSession {
     }
 
     private func tick() {
-        guard let endDate else { return }
+        guard !didFinish, let endDate else { return }
 
         let now = Date()
         let remaining = max(0, endDate.timeIntervalSince(now))
@@ -120,8 +125,13 @@ final class RecordingSession {
         onLiveUpdate?(totals.0, totals.1)
 
         if now >= endDate {
-            finish()
+            finish(at: endDate, partial: false)
         }
+    }
+
+    func stop() {
+        guard !didFinish else { return }
+        finish(at: min(Date(), endDate ?? Date()), partial: true)
     }
 
     private func accumulateDuration(
@@ -152,7 +162,9 @@ final class RecordingSession {
         }
     }
 
-    private func finish() {
+    private func finish(at finishDate: Date, partial: Bool) {
+        guard !didFinish else { return }
+        didFinish = true
         timer?.invalidate()
         timer = nil
 
@@ -161,29 +173,39 @@ final class RecordingSession {
             return
         }
 
+        let effectiveEndDate = min(finishDate, endDate)
+
         // Close any key still being held when the recording ends.
         if key1IsDown, let pressStart = key1PressStart {
-            accumulateDuration(from: pressStart, to: endDate, into: &key1Durations)
+            accumulateDuration(from: pressStart, to: effectiveEndDate, into: &key1Durations)
             key1IsDown = false
             key1PressStart = nil
         }
 
         if key2IsDown, let pressStart = key2PressStart {
-            accumulateDuration(from: pressStart, to: endDate, into: &key2Durations)
+            accumulateDuration(from: pressStart, to: effectiveEndDate, into: &key2Durations)
             key2IsDown = false
             key2PressStart = nil
         }
 
         do {
-            let records = buildRecords()
-            try CSVExporter.export(records: records, config: config, to: outputURL)
-            onFinished?(.success(()))
+            let records = buildRecords(until: effectiveEndDate)
+            let destination = partial ? partialURL : outputURL
+            try CSVExporter.export(records: records, config: config, to: destination)
+            onFinished?(.success(destination))
         } catch {
             onFinished?(.failure(error))
         }
     }
 
-    private func buildRecords() -> [IntervalRecord] {
+    private var partialURL: URL {
+        let baseName = outputURL.deletingPathExtension().lastPathComponent + "-partial"
+        return outputURL.deletingLastPathComponent()
+            .appendingPathComponent(baseName)
+            .appendingPathExtension(outputURL.pathExtension.isEmpty ? "csv" : outputURL.pathExtension)
+    }
+
+    private func buildRecords(until recordingEnd: Date) -> [IntervalRecord] {
         guard let startDate else { return [] }
 
         var records: [IntervalRecord] = []
@@ -191,8 +213,9 @@ final class RecordingSession {
 
         for index in 0..<intervalCount {
             let intervalStart = startDate.addingTimeInterval(Double(index) * config.interval)
+            guard intervalStart < recordingEnd else { break }
             let nominalEnd = intervalStart.addingTimeInterval(config.interval)
-            let realEnd = min(nominalEnd, startDate.addingTimeInterval(config.duration))
+            let realEnd = min(nominalEnd, recordingEnd)
 
             records.append(
                 IntervalRecord(

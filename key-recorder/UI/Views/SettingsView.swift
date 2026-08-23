@@ -1,0 +1,99 @@
+import SwiftUI
+
+struct SettingsView: View {
+    @EnvironmentObject private var appState: AppState
+
+    var body: some View {
+        TabView {
+            generalTab
+                .tabItem { Label("General", systemImage: "gear") }
+
+            recordingTab
+                .tabItem { Label("Recording", systemImage: "record.circle") }
+
+            aboutTab
+                .tabItem { Label("About", systemImage: "info.circle") }
+
+            HelpView()
+                .tabItem { Label("Help", systemImage: "questionmark.circle") }
+        }
+        .frame(width: 520, height: 360)
+        .padding(20)
+    }
+
+    private var generalTab: some View {
+        Form {
+            Picker("Appearance", selection: $appState.appearance) {
+                ForEach(AppearanceMode.allCases) { mode in
+                    Text(mode.title).tag(mode)
+                }
+            }
+
+            Section {
+                Text("Automatic follows the appearance selected in macOS System Settings.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Button("Reset Recording Settings") {
+                appState.resetSettings()
+            }
+        }
+        .formStyle(.grouped)
+        .disabled(appState.isRecording)
+    }
+
+    private var recordingTab: some View {
+        Form {
+            TextField("Duration (seconds)", text: $appState.durationText)
+            TextField("Interval (seconds)", text: $appState.intervalText)
+
+            keySetting(title: "Key 1", name: $appState.key1Name, text: appState.key1Text) {
+                appState.captureKey1()
+            }
+            keySetting(title: "Key 2", name: $appState.key2Name, text: appState.key2Text) {
+                appState.captureKey2()
+            }
+
+            Text("The app records only the two configured keys and stores data locally.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .formStyle(.grouped)
+    }
+
+    private var aboutTab: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "keyboard")
+                .font(.system(size: 42))
+                .foregroundStyle(.tint)
+            Text("Key Recorder")
+                .font(.title2.bold())
+            Text("Privacy-focused keyboard measurement for macOS")
+                .foregroundStyle(.secondary)
+            Text("Version 1.1.0")
+                .font(.caption)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func keySetting(
+        title: String,
+        name: Binding<String>,
+        text: String,
+        capture: @escaping () -> Void
+    ) -> some View {
+        HStack {
+            VStack(alignment: .leading) {
+                Text(title)
+                Text("Current key: \(text)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            TextField("Name", text: name)
+                .frame(width: 120)
+            Button("Detect…", action: capture)
+        }
+    }
+}

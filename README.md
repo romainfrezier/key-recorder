@@ -2,13 +2,13 @@
 
 # 🔑 Key Recorder
 
-[![macOS](https://img.shields.io/badge/macOS-13.0%2B-blue?logo=apple)](https://www.apple.com/macos/)
+[![macOS](https://img.shields.io/badge/macOS-15.1%2B-blue?logo=apple)](https://www.apple.com/macos/)
 [![Swift](https://img.shields.io/badge/Swift-5.9-orange?logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 **A macOS utility to measure keyboard usage patterns for productivity analysis**
 
-[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Privacy](#privacy--security) • [Contribute](#contributing)
+[Features](#features) • [Installation](#installation) • [User guide](#user-guide) • [Privacy](#privacy--security) • [Contribute](#contributing)
 
 <img src="docs/screenshot.png" alt="Key Recorder Screenshot" width="600">
 
@@ -20,6 +20,11 @@
 
 Key Recorder is a privacy-focused, open-source macOS application that allows you to track and analyze your keyboard usage patterns. Whether you're conducting UX research, measuring productivity metrics, or analyzing coding habits, Key Recorder provides detailed CSV exports with interval-based duration tracking.
 
+It is also intended for non-technical operators, including biology and
+animal-behaviour researchers. The [researcher user guide](docs/user-guide.md)
+explains the setup, permissions, observation workflow, and CSV interpretation
+without requiring programming knowledge.
+
 > ⚠️ **For legitimate use only**: This tool is designed for educational and productivity research purposes. The application requires explicit user permissions and stores all data locally.
 
 ## ✨ Features
@@ -27,6 +32,9 @@ Key Recorder is a privacy-focused, open-source macOS application that allows you
 - 🎹 **Real-time keyboard monitoring** with configurable tracking keys
 - 📊 **Interval-based analysis** with custom duration and sampling intervals
 - 📁 **CSV export** with detailed timestamps and duration breakdowns
+- 🗂️ **Session archive** with searchable local history and CSV re-export
+- 🧾 **In-app CSV preview** with editable experiment metadata
+- 📥 **CSV import** for previous observations
 - 🔒 **100% local processing** - no data ever leaves your device
 - 🎨 **Native macOS UI** built with SwiftUI
 - ⚙️ **Highly configurable** - track any keys, customize intervals and duration
@@ -44,6 +52,8 @@ Key Recorder is a privacy-focused, open-source macOS application that allows you
 ### Download Pre-built Release
 
 Download the latest release from the [Releases](https://github.com/romainfrezier/key-recorder/releases) page.
+
+Open the downloaded DMG, drag **Key Recorder** to **Applications**, and launch it. The release build is ad hoc signed and may show a Gatekeeper warning because it is not notarized with Apple.
 
 ### Build from Source
 
@@ -76,15 +86,11 @@ Track interactions of real mice (mus musculus) in controlled behavioral experime
   ```
 - **Research Applications**: Cognition studies, learning experiments, preference testing, pharmacological behavior studies
 
-## 🎮 Usage
-Optimize gaming or competitive skills:
+## 📋 User guide
 
-**Use Case: Speed Typing Training**
-- Track specific key combinations (`wasd`, skill hotkeys)
-- Measure reaction times between key presses
-- Analyze hand positioning through key distribution
-
-## 🎮 Usage
+See the [Key Recorder User Guide for Researchers](docs/user-guide.md) for a
+step-by-step first experiment, permission explanations, protocol guidance,
+CSV interpretation, and troubleshooting.
 
 ### First Launch
 
@@ -100,7 +106,7 @@ Optimize gaming or competitive skills:
 2. **Set Custom Names**: Give each key a descriptive name
 3. **Configure Duration**: Total recording time (default: 10 seconds)
 4. **Set Interval**: Sampling interval for duration accumulation (default: 2 seconds)
-5. **Choose Export Location**: Select where to save the CSV file
+5. **Choose Export Location**: Select where to save a copy of the CSV file
 
 ### Starting a Recording
 
@@ -108,6 +114,10 @@ Optimize gaming or competitive skills:
 2. The app will track key presses for the specified duration
 3. Live statistics are displayed during recording
 4. CSV is automatically exported when the session completes
+
+You can also use `⌘R` to start and `⌘.` to stop. `⌘,` opens Preferences, where you can configure the appearance and recording defaults. Stopping early exports a partial CSV with a `-partial` filename suffix.
+
+Every completed session is also archived inside Key Recorder. Use the Sessions sidebar to search previous observations, review a CSV without opening a spreadsheet, edit experiment metadata, import an older CSV, or export another copy at any time.
 
 ### CSV Output Format
 
@@ -166,6 +176,10 @@ key-recorder/
     └── ViewModels/
         └── AppState.swift
 ```
+
+At runtime, session data is stored outside the project in
+`~/Library/Application Support/Key Recorder/`, with `Sessions.sqlite3` as the
+catalogue and `CSV/` as the protected archive of measurement files.
 
 ### Key Design Decisions
 
