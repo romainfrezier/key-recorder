@@ -5,7 +5,7 @@ COPY package*.json ./
 RUN npm ci
 COPY . .
 
-ARG VITE_SITE_URL=https://key-recorder.frezier.fr
+ARG VITE_SITE_URL=https://key-recorder.com
 ARG VITE_BASE_PATH=/
 ENV VITE_SITE_URL=$VITE_SITE_URL
 ENV VITE_BASE_PATH=$VITE_BASE_PATH
