@@ -20,7 +20,6 @@ struct SettingsView: View {
         .frame(width: 680, height: 480)
         .padding(20)
         .preferredColorScheme(appState.appearance.colorScheme)
-        .tint(appState.accentColor.color)
     }
 
     private var generalTab: some View {
@@ -31,14 +30,8 @@ struct SettingsView: View {
                 }
             }
 
-            Picker("Accent Color", selection: $appState.accentColor) {
-                ForEach(AccentColor.allCases) { color in
-                    Text(color.title).tag(color)
-                }
-            }
-
             Section {
-                Text("Automatic follows the appearance selected in macOS System Settings.")
+                Text("Appearance and accent color follow macOS System Settings.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

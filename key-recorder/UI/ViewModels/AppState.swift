@@ -35,36 +35,6 @@ enum AppearanceMode: String, CaseIterable, Identifiable {
     }
 }
 
-enum AccentColor: String, CaseIterable, Identifiable {
-    case blue
-    case purple
-    case pink
-    case red
-    case orange
-    case yellow
-    case green
-    case gray
-
-    var id: String { rawValue }
-
-    var title: String {
-        rawValue.capitalized
-    }
-
-    var color: Color {
-        switch self {
-        case .blue: return .blue
-        case .purple: return .purple
-        case .pink: return .pink
-        case .red: return .red
-        case .orange: return .orange
-        case .yellow: return .yellow
-        case .green: return .green
-        case .gray: return .gray
-        }
-    }
-}
-
 
 // Import Core module types - they are part of the same target
 
@@ -97,7 +67,6 @@ final class AppState: ObservableObject {
     @Published var durationText: String = "10" { didSet { persist() } }
     @Published var intervalText: String = "2" { didSet { persist() } }
     @Published var appearance: AppearanceMode = .system { didSet { persist() } }
-    @Published var accentColor: AccentColor = .red { didSet { persist() } }
     @Published var liveKey1Duration: TimeInterval = 0
     @Published var liveKey2Duration: TimeInterval = 0
     @Published var csvURL: URL?
@@ -135,7 +104,6 @@ final class AppState: ObservableObject {
         static let duration = "duration"
         static let interval = "interval"
         static let appearance = "appearance"
-        static let accentColor = "accentColor"
         static let csvURL = "csvURL"
         static let key1Code = "key1Code"
         static let key2Code = "key2Code"
@@ -152,9 +120,6 @@ final class AppState: ObservableObject {
         intervalText = defaults.string(forKey: DefaultsKey.interval) ?? intervalText
         if let rawAppearance = defaults.string(forKey: DefaultsKey.appearance) {
             appearance = AppearanceMode(rawValue: rawAppearance) ?? .system
-        }
-        if let rawAccentColor = defaults.string(forKey: DefaultsKey.accentColor) {
-            accentColor = AccentColor(rawValue: rawAccentColor) ?? .red
         }
         if let savedURL = defaults.url(forKey: DefaultsKey.csvURL) {
             csvURL = savedURL
