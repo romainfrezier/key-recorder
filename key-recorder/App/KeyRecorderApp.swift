@@ -18,10 +18,23 @@ struct KeyRecorderApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(appState)
+                .environment(\.locale, appState.language.locale)
                 .frame(minWidth: 520, minHeight: 420)
+                .preferredColorScheme(appState.appearance.colorScheme)
                 .onAppear {
                     appDelegate.appState = appState
+                    appState.preparePermissionsPromptIfNeeded()
                 }
+        }
+        .commands {
+            KeyRecorderCommands(appState: appState)
+        }
+
+        Settings {
+            SettingsView()
+                .environmentObject(appState)
+                .environment(\.locale, appState.language.locale)
+                .preferredColorScheme(appState.appearance.colorScheme)
         }
     }
 }

@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-08-22
+
+### Added
+- Native macOS Preferences with General, Recording, and About sections
+- Automatic, Light, and Dark appearance modes
+- Native Recording menu commands and `⌘R`, `⌘.`, and `⌘,` shortcuts
+- Key detection from the physical keyboard
+- Partial CSV export when stopping a recording early
+- Reproducible macOS DMG packaging
+- Searchable local session catalogue backed by SQLite
+- Internal CSV archive with unlimited re-export
+- CSV import and in-app interval preview
+- Editable experiment metadata without changing measured durations
+
+### Fixed
+- Serialized recording events with the main-actor session state
+- CSV headers with quotes and locale-dependent decimal formatting
+- Permission prompting after the application state is ready
+
 ## [1.0.0] - 2026-08-12
 
 ### Added
@@ -26,4 +45,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Thread-safe event processing
 
 [Unreleased]: https://github.com/romainfrezier/key-recorder/compare/v1.0.0...HEAD
+[1.1.0]: https://github.com/romainfrezier/key-recorder/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/romainfrezier/key-recorder/releases/tag/v1.0.0

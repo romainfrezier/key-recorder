@@ -24,11 +24,19 @@ enum KeyParser {
         "space": 49
     ]
 
+    private static let reverseMap: [CGKeyCode: String] = Dictionary(
+        uniqueKeysWithValues: map.map { ($0.value, $0.key) }
+    )
+
     static func keyCode(from input: String) -> CGKeyCode? {
         let normalized = input
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .lowercased()
 
         return map[normalized]
+    }
+
+    static func displayName(for keyCode: CGKeyCode) -> String {
+        reverseMap[keyCode] ?? "Key code \(keyCode)"
     }
 }
