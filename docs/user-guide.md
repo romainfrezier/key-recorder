@@ -74,17 +74,18 @@ archive cleanup is a separate operation.
 
 ## Permissions
 
-macOS protects keyboard monitoring. Key Recorder needs these permissions only
-to receive the two selected keys while a measurement is being prepared or
-recorded:
-
-- **Accessibility**
-- **Input Monitoring**
+macOS protects global keyboard monitoring. Key Recorder uses a passive event tap
+and needs **Input Monitoring** to receive the two selected keys while a
+measurement is being prepared or recorded.
 
 When macOS opens System Settings, enable Key Recorder under
-**Privacy & Security**. If the permission message remains visible, quit and
-reopen the application after changing the setting. The application does not
-use these permissions to read passwords or save general keyboard input.
+**Privacy & Security → Input Monitoring**. If the permission message remains
+visible, quit and reopen the application after changing the setting.
+
+Key Recorder does not post, modify, or automate keyboard input, so
+**Accessibility is not required for passive recording** in the current release.
+The application does not use these permissions to read passwords or save
+general keyboard input.
 
 ## Running an observation
 

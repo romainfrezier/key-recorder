@@ -2,272 +2,236 @@
 
 # 🔑 Key Recorder
 
-[![macOS](https://img.shields.io/badge/macOS-15.1%2B-blue?logo=apple)](https://www.apple.com/macos/)
-[![Swift](https://img.shields.io/badge/Swift-5.9-orange?logo=swift)](https://swift.org)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+**A private macOS timer for measuring two keyboard-controlled events**
 
-**A macOS utility to measure keyboard usage patterns for productivity analysis**
+[![macOS 15.1+](https://img.shields.io/badge/macOS-15.1%2B-111827?logo=apple&logoColor=white)](https://www.apple.com/macos/)
+[![Swift 5](https://img.shields.io/badge/Swift-5-F05138?logo=swift&logoColor=white)](https://swift.org)
+[![Latest release](https://img.shields.io/github/v/release/romainfrezier/key-recorder?display_name=tag&sort=semver)](https://github.com/romainfrezier/key-recorder/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-16a34a.svg)](LICENSE)
 
-<p align="center" style="margin: 16px 0;">
+[Website](https://key-recorder.com) · [Download](https://github.com/romainfrezier/key-recorder/releases/latest) · [User guide](docs/user-guide.md) · [Contributing](CONTRIBUTING.md)
+
+<p align="center" style="margin: 20px 0;">
+  <img src="docs/screenshot.png" alt="Key Recorder recording window" width="760">
+</p>
+
+<p>
   <a href="https://buymeacoffee.com/romainfrezier">
     <img src="docs/bmc-button.png" alt="Buy Me a Coffee" width="100">
   </a>
 </p>
 
-[Features](#features) • [Installation](#installation) • [User guide](#user-guide) • [Privacy](#privacy--security) • [Contribute](#contributing)
-
-<img src="docs/screenshot.png" alt="Key Recorder Screenshot" width="600">
-
 </div>
 
 ---
 
-## 📖 Overview
+## What Key Recorder does
 
-Key Recorder is a privacy-focused, open-source macOS application that allows you to track and analyze your keyboard usage patterns. Whether you're conducting UX research, measuring productivity metrics, or analyzing coding habits, Key Recorder provides detailed CSV exports with interval-based duration tracking.
+Key Recorder is a native, open-source macOS app for short, controlled
+observations. Assign a meaning to two physical keys, hold one while an event
+is happening, and get a clean CSV showing the duration accumulated by each key
+over time intervals.
 
-It is also intended for non-technical operators, including biology and
-animal-behaviour researchers. The [researcher user guide](docs/user-guide.md)
-explains the setup, permissions, observation workflow, and CSV interpretation
-without requiring programming knowledge.
+It is useful for:
 
-> ⚠️ **For legitimate use only**: This tool is designed for educational and productivity research purposes. The application requires explicit user permissions and stores all data locally.
+- animal-behaviour and laboratory observations;
+- UX or accessibility studies;
+- productivity and workflow experiments;
+- any protocol where an operator needs two simple event markers.
 
-## ✨ Features
+Key Recorder does **not** record what you type, identify people, or send data
+over the network. It listens only while the app is open and a recording is in
+progress, then keeps the result on your Mac.
 
-- 🎹 **Real-time keyboard monitoring** with configurable tracking keys
-- 📊 **Interval-based analysis** with custom duration and sampling intervals
-- 📁 **CSV export** with detailed timestamps and duration breakdowns
-- 🗂️ **Session archive** with searchable local history and CSV re-export
-- 🧾 **In-app CSV preview** with editable experiment metadata
-- 📥 **CSV import** for previous observations
-- 🔒 **100% local processing** - no data ever leaves your device
-- 🎨 **Native macOS UI** built with SwiftUI
-- ⚙️ **Highly configurable** - track any keys, customize intervals and duration
-- ✅ **Accessibility compliant** with clear permission handling
-- 🧵 **Thread-safe** architecture for reliable performance
+> **Use responsibly.** Keyboard monitoring requires explicit macOS permission.
+> Use this app only with the knowledge and consent required by your protocol,
+> workplace, institution, and applicable privacy rules.
 
-## 🚀 Installation
+## Highlights
 
-### Requirements
+- **Two configurable event keys** with custom names and physical-key detection.
+- **Duration-based measurements** split into configurable intervals.
+- **Live recording status** with start, stop, and early-stop support.
+- **Portable CSV exports** with stable headers, interval labels, decimal values, and
+  a `TOTAL` row.
+- **Local session archive** backed by SQLite, with search, metadata, preview,
+  import, and unlimited re-export.
+- **Three languages**: English, French, and Italian.
+- **Native macOS experience** with Preferences, Light/Dark/Automatic appearance,
+  and keyboard shortcuts.
+- **Privacy-first architecture**: no analytics, no cloud account, and no
+  network service.
 
-- macOS 15.1+
-- Swift 5.9+
-- Xcode 15.0+ (for building from source)
+## Install
 
-### Download Pre-built Release
+### Download the app
 
-Download the latest release from the [Releases](https://github.com/romainfrezier/key-recorder/releases) page.
+Download the latest DMG from the
+[GitHub Releases](https://github.com/romainfrezier/key-recorder/releases/latest)
+page, open it, and drag **Key Recorder** to **Applications**.
 
-Open the downloaded DMG, drag **Key Recorder** to **Applications**, and launch it. The release build is ad hoc signed and may show a Gatekeeper warning because it is not notarized with Apple.
+The public DMG is ad hoc signed and is not notarized by Apple. macOS may show
+a Gatekeeper warning the first time you open it. Only open a release downloaded
+from the official repository, or build the app yourself from source.
 
-### Build from Source
+### Build from source
+
+Requirements:
+
+- macOS 15.1 or later;
+- Xcode 16.2 or later;
+- a Mac capable of running the Xcode build tools.
 
 ```bash
-# Clone the repository
 git clone https://github.com/romainfrezier/key-recorder.git
 cd key-recorder
-
-# Open in Xcode
 open key-recorder.xcodeproj
-
-# Build and run (⌘+R)
 ```
 
-## 🎯 Use Case
+Run the app with **⌘R**. Run the test suite with **⌘U**.
 
-**Research: Animal Behavior - Mouse Interaction Study**
-
-Track interactions of real mice (mus musculus) in controlled behavioral experiments:
-
-- **Objective**: Monitor mouse interactions with Object A (food dispenser) vs Object B (lever) in a maze setting
-- **Setup**: Researchers press `a` key when mouse interacts with Object A (food dispenser), `b` key when mouse interacts with Object B (lever)
-- **Analysis**: CSV data reveals behavioral patterns, preference scores, and interaction timing between the two objects
-- **Example Output**:
-  ```csv
-  interval,Object A,Object B
-  0s - 30s,12.45,8.32
-  30s - 60s,15.67,4.21
-  TOTAL,28.12,12.53
-  ```
-- **Research Applications**: Cognition studies, learning experiments, preference testing, pharmacological behavior studies
-
-## 📋 User guide
-
-See the [Key Recorder User Guide for Researchers](docs/user-guide.md) for a
-step-by-step first experiment, permission explanations, protocol guidance,
-CSV interpretation, and troubleshooting.
-
-### First Launch
-
-1. Launch the application
-2. Grant **Accessibility** permission when prompted (required to monitor keyboard globally)
-3. Grant **Input Monitoring** permission when prompted (required to capture key events)
-
-> 💡 **Why these permissions?** macOS requires these permissions for any app that needs to monitor keyboard input outside its own window. See our [Privacy](#privacy--security) section for details.
-
-### Configuration
-
-1. **Select Keys to Track**: Enter the keyboard keys you want to monitor (e.g., `a`, `b`, `space`)
-2. **Set Custom Names**: Give each key a descriptive name
-3. **Configure Duration**: Total recording time (default: 10 seconds)
-4. **Set Interval**: Sampling interval for duration accumulation (default: 2 seconds)
-5. **Choose Export Location**: Select where to save a copy of the CSV file
-
-### Starting a Recording
-
-1. Click **"Start Recording"** or press **Return**
-2. The app will track key presses for the specified duration
-3. Live statistics are displayed during recording
-4. CSV is automatically exported when the session completes
-
-You can also use `⌘R` to start and `⌘.` to stop. `⌘,` opens Preferences, where you can configure the appearance and recording defaults. Stopping early exports a partial CSV with a `-partial` filename suffix.
-
-Preferences also lets you choose English, French, or Italian. The Settings button
-on the home screen opens Preferences directly, and **How to use Key Recorder**
-opens the Help tab there.
-
-Every completed session is also archived inside Key Recorder. Use the Sessions sidebar to search previous observations, review a CSV without opening a spreadsheet, edit experiment metadata, import an older CSV, or export another copy at any time.
-
-### CSV Output Format
-
-```csv
-interval,Key 1,Key 2
-0s - 2s,1.234,0.567
-2s - 4s,0.891,1.123
-4s - 6s,0.456,0.789
-...
-
-TOTAL,12.345,15.678
-```
-
-## 🔒 Privacy & Security
-
-### Data Handling
-
-- ✅ **No network access** - Key Recorder operates entirely offline
-- ✅ **No data collection** - All information stays on your device
-- ✅ **No background processes** - App only runs when you explicitly open it
-- ✅ **Transparent permissions** - Explicit permission prompts before any system access
-
-### Security Best Practices
-
-The codebase follows industry best practices:
-
-- 🔐 **Thread-safe queue** for keyboard event handling
-- 🔐 **Permission validation** before accessing system features
-- 🔐 **Minimal attack surface** - no network code, no external dependencies
-- 🔐 **Transparent code** - 100% open source, auditable by anyone
-
-**We recommend**: Always review the Permissions section in System Settings → Privacy & Security, and revoke permissions when not actively using the app.
-
-## 🏗️ Architecture
-
-```
-key-recorder/
-├── App/                            # Application entry points
-│   ├── KeyRecorderApp.swift
-│   └── AppDelegate.swift
-├── Core/                           # Business logic
-│   ├── Models/                     # Data models
-│   │   ├── RecordingConfig.swift
-│   │   ├── IntervalRecord.swift
-│   │   └── Errors.swift
-│   ├── Services/                   # Core services
-│   │   ├── PermissionManager.swift  # Permission handling
-│   │   ├── KeyboardMonitor.swift    # Event monitoring
-│   │   ├── RecordingSession.swift   # Session management
-│   │   └── CSVExporter.swift        # Data export
-│   └── Utils/                      # Utilities
-│       └── KeyParser.swift
-└── UI/                             # User interface
-    ├── Views/
-    │   └── ContentView.swift
-    └── ViewModels/
-        └── AppState.swift
-```
-
-At runtime, session data is stored outside the project in
-`~/Library/Application Support/Key Recorder/`, with `Sessions.sqlite3` as the
-catalogue and `CSV/` as the protected archive of measurement files.
-
-### Key Design Decisions
-
-- **MainActor for UI**: All UI updates are dispatched to the main actor
-- **Dedicated event queue**: Keyboard events are processed on a separate queue for performance
-- **SwiftUI native**: Built entirely with native macOS UI frameworks
-- **Error handling**: Comprehensive error types for all failure modes
-
-## 🛠️ Development
-
-### Project Structure
-
-The project uses a feature-based organization:
-
-- **Core/**: Business logic, models, and services
-- **UI/**: SwiftUI views and view models
-- **App/**: Application lifecycle and entry points
-
-### Running Tests
+For a reproducible local DMG after building an archive:
 
 ```bash
-# Open in Xcode and run tests (⌘+U)
-open key-recorder.xcodeproj
+./scripts/package-dmg.sh 1.1.3 \
+  "/path/to/Key Recorder.app" \
+  "/path/to/output/Key-Recorder-1.1.3.dmg"
 ```
 
-### Code Style
+## First recording
 
-This project follows Swift style guidelines:
+1. Open **Key Recorder → Preferences…** with **⌘,** if you want to change the
+   language, appearance, or recording defaults.
+2. Choose two keys and give them meaningful names, such as `Food dispenser`
+   and `Lever`.
+3. Use **Detect…** when the physical key is not obvious, especially with a
+   non-US keyboard layout.
+4. Set the total duration and the analysis interval in seconds.
+5. Choose the destination for an external CSV copy in the main window.
+6. Click **Start Recording** or press **⌘R**.
+7. Hold the configured key while its event is happening, then release it.
+8. Wait for the countdown to finish, or press **⌘.** to stop early.
 
-- Swift 5.9+ features (async/await, actors, etc.)
-- SwiftUI best practices
-- Comprehensive documentation comments
-- Meaningful variable names
+The app exports the CSV when the session ends. An early stop creates a valid
+partial export with a `-partial` filename suffix.
 
-## 🤝 Contributing
+### Permissions
 
-Contributions are welcome! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+Key Recorder uses a passive macOS event tap to receive global key-down and
+key-up events. **Input Monitoring** is the permission required for recording.
+Enable it under **System Settings → Privacy & Security → Input Monitoring**.
 
-### Quick Start
+The app may also display an Accessibility status because macOS exposes both
+capabilities for keyboard-related tools. Key Recorder only listens to events;
+it does not post, modify, or automate keyboard input, so Accessibility is not
+required for passive recording in the current release.
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
+If the status does not update after changing a permission, quit and reopen the
+app. See the [researcher user guide](docs/user-guide.md) for a complete setup
+and troubleshooting walkthrough.
 
-### Areas for Contribution
+## CSV format
 
-- 🌍 Internationalization support
-- 📊 Additional export formats (JSON, XML)
-- 🎨 Dark mode improvements
-- 🧪 Unit tests coverage
-- 📖 Documentation improvements
+Values are **durations in seconds**, not counts of key presses. The interval is
+an analysis window: it is not a sampling delay.
 
-## ☕ Support
+```csv
+interval,Food dispenser,Lever
+0s - 30s,12.450,4.200
+30s - 60s,8.100,10.000
 
-If Key Recorder is useful to you, you can [buy me a coffee](https://buymeacoffee.com/romainfrezier).
+TOTAL,20.550,14.200
+```
 
-## 📄 License
+Each row contains the time spent holding each configured key during that
+interval. `TOTAL` sums the durations across the complete observation. The
+result can be opened in spreadsheet software or processed with R, Python, or
+another analysis tool.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## Sessions and local storage
 
-## 🙏 Acknowledgments
+Every completed, partial, or imported session is kept in the local **Sessions** archive.
+From the sidebar you can:
 
-- Built with [Swift](https://swift.org) and [SwiftUI](https://developer.apple.com/xcode/swiftui/)
-- Inspired by productivity research tools and accessibility utilities
-- Thanks to all contributors who have helped improve this project
+- search by title, experiment ID, subject, operator, protocol, tag, or note;
+- preview the CSV without opening a spreadsheet;
+- edit experiment metadata without changing measured durations;
+- import an older compatible CSV;
+- export another copy or reveal the archived file in Finder.
 
-## ⚠️ Disclaimer
+The internal archive is stored at:
 
-This software is provided for educational and productivity research purposes only. Users are responsible for complying with all applicable laws and privacy regulations when using this tool. The authors assume no liability for misuse or damages arising from the use of this software.
+```text
+~/Library/Application Support/Key Recorder/
+├── Sessions.sqlite3
+└── CSV/
+```
 
----
+The CSV in this folder is the protected internal copy. Files exported to the
+Desktop, Downloads, or a shared laboratory folder are separate copies.
+Removing a session from the list does not delete its archived CSV.
+
+## Project layout
+
+```text
+key-recorder/
+├── key-recorder/
+│   ├── App/       # App lifecycle and menu commands
+│   ├── Core/      # Recording, permissions, CSV, archive, and models
+│   └── UI/        # SwiftUI views and application state
+├── key-recorderTests/
+├── docs/
+├── scripts/
+└── website/       # Multilingual static marketing site
+```
+
+The app uses native macOS frameworks, SwiftUI, Core Graphics event taps, and
+SQLite. Recording events are handled away from the main UI thread and the app
+does not include a network client or telemetry service.
+
+## Development
+
+Open `key-recorder.xcodeproj` in Xcode, then use:
+
+- **⌘R** to build and run;
+- **⌘U** to run unit tests;
+- the **Recording** menu to exercise start, stop, CSV location, and last-export
+  commands.
+
+The project website lives in [`website/`](website/README.md) and contains the
+English, French, and Italian product pages with pre-rendered SEO metadata.
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+Recent changes are documented in [CHANGELOG.md](CHANGELOG.md).
+
+## Privacy and security
+
+- No analytics or telemetry.
+- No cloud account and no network upload.
+- No general keyboard log: only the two selected key codes are used during a
+  recording.
+- Transparent permission handling before monitoring begins.
+- Local archive files remain under the user's macOS Application Support folder.
+
+Because the archive is local, apply your own institution's backup, retention,
+and access-control policy to the Mac and any exported copies.
+
+## Support
+
+- [Researcher user guide](docs/user-guide.md)
+- [GitHub Issues](https://github.com/romainfrezier/key-recorder/issues)
+- [GitHub Discussions](https://github.com/romainfrezier/key-recorder/discussions)
+- [Buy Me a Coffee](https://buymeacoffee.com/romainfrezier)
+
+## License
+
+Key Recorder is released under the [MIT License](LICENSE).
 
 <div align="center">
 
-**[🌟 Star this repo](https://github.com/romainfrezier/key-recorder)** if you find it useful!
+**[🌟 Star the repository](https://github.com/romainfrezier/key-recorder)** if
+you find it useful.
 
-Made with ❤️
+Made with ❤️ for careful, local-first observations.
 
 </div>
