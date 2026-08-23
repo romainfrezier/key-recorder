@@ -57,12 +57,12 @@ struct SettingsView: View {
 
     private var recordingTab: some View {
         Form {
+            Text("These are the default values used when starting a new recording. You can change them here or before each observation.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+
             TextField("Duration (seconds)", text: $appState.durationText)
             TextField("Interval (seconds)", text: $appState.intervalText)
-
-            Text("These are the default values used when starting a new recording. You can change them here or before each observation.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
 
             keySetting(title: "Key 1", name: $appState.key1Name, text: appState.key1Text) {
                 appState.captureKey1()
@@ -71,9 +71,6 @@ struct SettingsView: View {
                 appState.captureKey2()
             }
 
-            Text("The app records only the two configured keys and stores data locally.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
         }
         .formStyle(.grouped)
     }
@@ -92,6 +89,8 @@ struct SettingsView: View {
             Link(destination: URL(string: "https://buymeacoffee.com/romainfrezier")!) {
                 Label("Buy me a coffee", systemImage: "cup.and.saucer")
             }
+            .foregroundStyle(Color(nsColor: .controlAccentColor))
+            .pointingHandCursor()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

@@ -93,18 +93,14 @@ private extension ContentView {
     }
 
     var headerSection: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Key Recorder")
-                .font(.system(size: 28, weight: .bold))
+        HStack(alignment: .top, spacing: 16) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Key Recorder")
+                    .font(.system(size: 28, weight: .bold))
 
-            Text("Record global keyboard activity and export the result to CSV.")
-                .font(.callout)
-                .foregroundStyle(.secondary)
-
-            HStack(spacing: 14) {
-                SettingsLink {
-                    Label("Settings", systemImage: "gear")
-                }
+                Text("Record global keyboard activity and export the result to CSV.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
 
                 Button {
                     appState.openHelp()
@@ -112,7 +108,21 @@ private extension ContentView {
                     Label("How to use Key Recorder", systemImage: "questionmark.circle")
                 }
                 .buttonStyle(.link)
+                .foregroundStyle(Color(nsColor: .controlAccentColor))
+                .pointingHandCursor()
             }
+
+            Spacer()
+
+            SettingsLink {
+                Image(systemName: "gear")
+                    .font(.title2)
+                    .frame(width: 32, height: 32)
+            }
+            .buttonStyle(.borderless)
+            .foregroundStyle(Color(nsColor: .controlAccentColor))
+            .help("Settings")
+            .pointingHandCursor()
         }
     }
 
