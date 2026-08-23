@@ -87,10 +87,16 @@ struct SettingsView: View {
             Text("Version 1.1.0")
                 .font(.caption)
             Link(destination: URL(string: "https://buymeacoffee.com/romainfrezier")!) {
-                Label("Buy me a coffee", systemImage: "cup.and.saucer")
+                Image("BMCButton")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 280)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .accessibilityLabel("Buy me a coffee")
             }
-            .foregroundStyle(Color(nsColor: .controlAccentColor))
+            .buttonStyle(.plain)
             .pointingHandCursor()
+            .help("Buy me a coffee")
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
