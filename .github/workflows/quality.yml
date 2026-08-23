@@ -12,5 +12,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Test
         run: xcodebuild test -project key-recorder.xcodeproj -scheme key-recorder -destination 'platform=macOS' -only-testing:key-recorderTests -parallel-testing-enabled NO
-      - name: Build unsigned app
-        run: xcodebuild build -project key-recorder.xcodeproj -scheme key-recorder -configuration Release -sdk macosx CODE_SIGNING_ALLOWED=NO
+      - name: Build release archive
+        run: xcodebuild archive -project key-recorder.xcodeproj -scheme key-recorder -configuration Release -destination 'generic/platform=macOS' -archivePath "$RUNNER_TEMP/KeyRecorder.xcarchive" CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=NO
+      - name: Package and verify ad hoc DMG
+        run: |
+          APP_PATH="$RUNNER_TEMP/KeyRecorder.xcarchive/Products/Applications/key-recorder.app"
+          VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP_PATH/Contents/Info.plist")
+          scripts/package-dmg.sh "$VERSION" "$APP_PATH" "$RUNNER_TEMP/KeyRecorder-$VERSION.dmg"
+          scripts/verify-dmg.sh "$VERSION" "$RUNNER_TEMP/KeyRecorder-$VERSION.dmg"

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.4] - 2026-08-23
+
+### Fixed
+- Sign the complete application bundle before creating the DMG
+- Verify the mounted DMG, application signature, version, checksum, and universal executable before release
+- Display the real bundle version in About
+- Use the native Input Monitoring status and request APIs without asking for Accessibility
+- Stop the keyboard monitor cleanly and avoid retaining every observed keyboard event
+
 ## [1.1.3] - 2026-08-23
 
 ### Fixed
@@ -64,7 +73,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Transparent permission system
 - Thread-safe event processing
 
-[Unreleased]: https://github.com/romainfrezier/key-recorder/compare/v1.1.3...HEAD
+[Unreleased]: https://github.com/romainfrezier/key-recorder/compare/v1.1.4...HEAD
+[1.1.4]: https://github.com/romainfrezier/key-recorder/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/romainfrezier/key-recorder/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/romainfrezier/key-recorder/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/romainfrezier/key-recorder/compare/v1.1.0...v1.1.1

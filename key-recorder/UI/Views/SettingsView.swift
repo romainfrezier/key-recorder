@@ -84,7 +84,7 @@ struct SettingsView: View {
                 .font(.title2.bold())
             Text("Privacy-focused keyboard measurement for macOS")
                 .foregroundStyle(.secondary)
-            Text("Version 1.1.0")
+            Text(versionText)
                 .font(.caption)
             Link(destination: URL(string: "https://buymeacoffee.com/romainfrezier")!) {
                 Image("BMCButton")
@@ -99,6 +99,12 @@ struct SettingsView: View {
             .help("Buy me a coffee")
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var versionText: String {
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"
+        let format = String(localized: "Version %@", locale: appState.language.locale)
+        return String(format: format, version)
     }
 
     private func keySetting(

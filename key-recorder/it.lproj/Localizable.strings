@@ -22,6 +22,7 @@
 "Accessibility" = "Accessibilità";
 "Input Monitoring" = "Monitoraggio input";
 "Grant %@ permissions in System Settings > Privacy & Security." = "Concedi le autorizzazioni %@ in Impostazioni di Sistema > Privacy e sicurezza.";
+"Open Input Monitoring Settings" = "Apri le impostazioni di monitoraggio input";
 " and " = " e ";
 "Start Recording" = "Avvia registrazione";
 "Stop Recording" = "Interrompi registrazione";
@@ -44,7 +45,7 @@
 "These are the default values used when starting a new recording. You can change them here or before each observation." = "Questi sono i valori predefiniti per le nuove registrazioni. Puoi modificarli qui o prima di ogni osservazione.";
 "The app records only the two configured keys and stores data locally." = "L’app registra solo i due tasti configurati e conserva i dati localmente.";
 "Privacy-focused keyboard measurement for macOS" = "Misurazione della tastiera rispettosa della privacy per macOS";
-"Version 1.1.0" = "Versione 1.1.0";
+"Version %@" = "Versione %@";
 "Buy me a coffee" = "Offrimi un caffè";
 "Start an observation" = "Avvia un’osservazione";
 "Permissions" = "Autorizzazioni";
@@ -62,7 +63,6 @@
 "Duration must be a positive number." = "La durata deve essere un numero positivo.";
 "Interval must be a positive number." = "L’intervallo deve essere un numero positivo.";
 "Interval cannot be greater than duration." = "L’intervallo non può essere maggiore della durata.";
-"Accessibility permission is missing. Open System Settings > Privacy & Security > Accessibility." = "Manca l’autorizzazione Accessibilità. Apri Impostazioni di Sistema > Privacy e sicurezza > Accessibilità.";
 "Input Monitoring permission is missing. Open System Settings > Privacy & Security > Input Monitoring." = "Manca l’autorizzazione Monitoraggio input. Apri Impostazioni di Sistema > Privacy e sicurezza > Monitoraggio input.";
 "Unable to create CGEvent tap. Check Input Monitoring permission." = "Impossibile creare il tap CGEvent. Controlla l’autorizzazione Monitoraggio input.";
 "Cannot start: %@" = "Impossibile avviare: %@";

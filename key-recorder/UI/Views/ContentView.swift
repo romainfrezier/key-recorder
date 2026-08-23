@@ -199,7 +199,7 @@ private extension ContentView {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 10) {
                     Circle()
-                        .fill(appState.isRecording ? .red : .green)
+                        .fill(appState.isRecording ? .red : appState.hasInputMonitoringPermission ? .green : .orange)
                         .frame(width: 10, height: 10)
 
                     Text(appState.statusMessage)
@@ -210,6 +210,14 @@ private extension ContentView {
                     Text(appState.permissionMessage)
                         .font(.callout)
                         .foregroundStyle(.secondary)
+
+                    if !appState.hasInputMonitoringPermission {
+                        Button {
+                            appState.openInputMonitoringSettings()
+                        } label: {
+                            Label("Open Input Monitoring Settings", systemImage: "gear")
+                        }
+                    }
                 }
 
                 if appState.isRecording {

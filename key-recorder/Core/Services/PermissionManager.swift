@@ -2,11 +2,10 @@
 //  PermissionManager.swift
 //  key-recorder
 //
-//  Manages Accessibility and Input Monitoring permissions for macOS.
+//  Manages Input Monitoring permission for macOS.
 //
 
 import Foundation
-import ApplicationServices
 import CoreGraphics
 import IOKit.hid
 
@@ -17,7 +16,6 @@ enum PermissionStatus {
 }
 
 struct PermissionState {
-    let accessibility: PermissionStatus
     let inputMonitoring: PermissionStatus
     
     var allGranted: Bool {
@@ -46,13 +44,9 @@ final class PermissionManager {
     private init() {}
     
     func checkPermissions(promptIfNeeded: Bool = false) -> PermissionState {
-        let accessibility = checkAccessibility(promptIfNeeded: promptIfNeeded)
         let inputMonitoring = checkInputMonitoring(promptIfNeeded: promptIfNeeded)
-        
-        return PermissionState(
-            accessibility: accessibility,
-            inputMonitoring: inputMonitoring
-        )
+
+        return PermissionState(inputMonitoring: inputMonitoring)
     }
     
     func ensureAllPermissions() throws {
@@ -65,39 +59,24 @@ final class PermissionManager {
     
     // MARK: - Private
     
-    private func checkAccessibility(promptIfNeeded: Bool) -> PermissionStatus {
-        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: promptIfNeeded] as CFDictionary
-        let isTrusted = AXIsProcessTrustedWithOptions(options)
-        return isTrusted ? .granted : .denied
-    }
-    
     private func checkInputMonitoring(promptIfNeeded: Bool) -> PermissionStatus {
-        if promptIfNeeded {
-            // This is the native macOS API that registers the app in
-            // Privacy & Security > Input Monitoring.
-            _ = IOHIDRequestAccess(kIOHIDRequestTypeListenEvent)
+        if CGPreflightListenEventAccess() {
+            return .granted
         }
 
-        // Check the exact capability used by KeyboardMonitor. The preflight
-        // API can remain false for an already-listed app on newer macOS
-        // versions, while a real passive event tap is usable.
-        let events = CGEventMask(
-            (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue)
-        )
-        let testTap = CGEvent.tapCreate(
-            tap: .cgSessionEventTap,
-            place: .headInsertEventTap,
-            options: .listenOnly,
-            eventsOfInterest: events,
-            callback: { _, _, event, _ in
-                Unmanaged.passUnretained(event)
-            },
-            userInfo: nil
-        )
+        let access = IOHIDCheckAccess(kIOHIDRequestTypeListenEvent)
+        if promptIfNeeded, access != kIOHIDAccessTypeGranted {
+            _ = IOHIDRequestAccess(kIOHIDRequestTypeListenEvent)
+            if CGPreflightListenEventAccess() {
+                return .granted
+            }
+        }
 
-        guard let testTap else { return .denied }
-        CGEvent.tapEnable(tap: testTap, enable: false)
-        CFMachPortInvalidate(testTap)
-        return .granted
+        switch access {
+        case kIOHIDAccessTypeUnknown:
+            return .unknown
+        default:
+            return .denied
+        }
     }
 }

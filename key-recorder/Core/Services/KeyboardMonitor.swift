@@ -13,7 +13,7 @@ final class KeyboardMonitor {
 
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
-    private var eventQueue: DispatchQueue?
+    private var runLoop: CFRunLoop?
     private var callbackQueue: DispatchQueue?
     
     private let lock = NSLock()
@@ -32,26 +32,22 @@ final class KeyboardMonitor {
         }
 
         let events = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue)
-        
-        // Use a dedicated queue for events instead of main thread
-        let eventQueue = DispatchQueue(label: "com.key-recorder.event-tap", qos: .userInteractive)
-        self.eventQueue = eventQueue
-        
+
         // Queue for callbacks back to the application
         let callbackQueue = DispatchQueue(label: "com.key-recorder.callbacks", qos: .userInitiated)
         self.callbackQueue = callbackQueue
         
         let callback: CGEventTapCallBack = { _, type, event, refcon in
             guard let refcon else {
-                return Unmanaged.passRetained(event)
+                return Unmanaged.passUnretained(event)
             }
 
             let monitor = Unmanaged<KeyboardMonitor>.fromOpaque(refcon).takeUnretainedValue()
             
-            // Handle event on the event queue
+            // Keep the event-tap callback short and forward application work.
             monitor.handleEventAsync(type, event: event)
 
-            return Unmanaged.passRetained(event)
+            return Unmanaged.passUnretained(event)
         }
 
         let refcon = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
@@ -68,18 +64,13 @@ final class KeyboardMonitor {
         }
 
         let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
-        
-        // Add to event queue's run loop instead of main
-        eventQueue.async { [weak self] in
-            guard let self = self else { return }
-            let runLoop = CFRunLoopGetCurrent()
-            CFRunLoopAddSource(runLoop, source, .commonModes)
-            CGEvent.tapEnable(tap: tap, enable: true)
-            CFRunLoopRun()
-        }
+        let runLoop = CFRunLoopGetMain()
+        CFRunLoopAddSource(runLoop, source, .commonModes)
+        CGEvent.tapEnable(tap: tap, enable: true)
 
         self.eventTap = tap
         self.runLoopSource = source
+        self.runLoop = runLoop
         self.isRunning = true
     }
 
@@ -94,22 +85,13 @@ final class KeyboardMonitor {
             CFMachPortInvalidate(tap)
         }
 
-        if let source = runLoopSource {
-            // Remove from the event queue's run loop
-            eventQueue?.async { [weak self] in
-                guard let self = self else { return }
-                CFRunLoopRemoveSource(CFRunLoopGetCurrent(), source, .commonModes)
-            }
-        }
-        
-        // Stop the run loop
-        eventQueue?.async { [weak self] in
-            CFRunLoopStop(CFRunLoopGetCurrent())
+        if let source = runLoopSource, let runLoop {
+            CFRunLoopRemoveSource(runLoop, source, .commonModes)
         }
 
         eventTap = nil
         runLoopSource = nil
-        eventQueue = nil
+        runLoop = nil
         callbackQueue = nil
         isRunning = false
     }

@@ -7,7 +7,6 @@
 
 import Foundation
 import AppKit
-import ApplicationServices
 import UniformTypeIdentifiers
 import SwiftUI
 
@@ -130,6 +129,7 @@ final class AppState: ObservableObject {
     @Published var remainingTime: TimeInterval = 0
     @Published var statusMessage: String = "Ready"
     @Published var permissionMessage: String = ""
+    @Published var hasInputMonitoringPermission = false
     @Published var sessions: [SessionEntry] = []
     @Published var selectedSessionID: String?
     @Published var sessionSearchText = "" {
@@ -205,12 +205,17 @@ final class AppState: ObservableObject {
 
     func preparePermissionsPromptIfNeeded() {
         let state = PermissionManager.shared.checkPermissions(promptIfNeeded: true)
-        permissionMessage = localizedPermissionMessage(state)
+        updatePermissionState(state)
     }
 
     func refreshPermissions() {
         let state = PermissionManager.shared.checkPermissions(promptIfNeeded: false)
-        permissionMessage = localizedPermissionMessage(state)
+        updatePermissionState(state)
+    }
+
+    func openInputMonitoringSettings() {
+        guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent") else { return }
+        NSWorkspace.shared.open(url)
     }
 
     func openSettings() {
@@ -558,6 +563,11 @@ final class AppState: ObservableObject {
 
         let format = localized("Grant %@ permissions in System Settings > Privacy & Security.")
         return String(format: format, missing.joined(separator: localized(" and ")))
+    }
+
+    private func updatePermissionState(_ state: PermissionState) {
+        hasInputMonitoringPermission = state.inputMonitoring == .granted
+        permissionMessage = localizedPermissionMessage(state)
     }
     
     func applyDurationPreset(_ value: Int) {
