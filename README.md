@@ -8,6 +8,10 @@
 
 **A macOS utility to measure keyboard usage patterns for productivity analysis**
 
+<a href="https://buymeacoffee.com/romainfrezier">
+  <img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me a Coffee" height="41">
+</a>
+
 [Features](#features) • [Installation](#installation) • [Usage](#usage) • [Privacy](#privacy--security) • [Contribute](#contributing)
 
 <img src="docs/screenshot.png" alt="Key Recorder Screenshot" width="600">
