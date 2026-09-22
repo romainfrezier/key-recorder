@@ -82,43 +82,22 @@ enum CSVExporter {
     }
     
     private static func buildCSV(records: [IntervalRecord], config: RecordingConfig) -> String {
-        let key1Header = escapeCSV(config.key1Name)
-        let key2Header = escapeCSV(config.key2Name)
-        
-        var csv = "interval,\(key1Header),\(key2Header)\n"
-        
-        guard let firstRecord = records.first else {
-            // If no records, still create file with headers and empty totals
-            csv += "\n"
-            csv += "TOTAL,0.000,0.000\n"
-            return csv
+        var csv = (["interval"] + config.keys.map { escapeCSV($0.name) }).joined(separator: ",") + "\n"
+        var totals = Array(repeating: 0.0, count: config.keys.count)
+
+        if let firstRecord = records.first {
+            for record in records {
+                let startSeconds = Int(record.intervalStart.timeIntervalSince(firstRecord.intervalStart).rounded(.down))
+                let endSeconds = Int(record.intervalEnd.timeIntervalSince(firstRecord.intervalStart).rounded(.down))
+                let label = "\(startSeconds)s - \(endSeconds)s"
+                csv += ([label] + record.keyDurations.map(formatNumber)).joined(separator: ",") + "\n"
+                for index in totals.indices { totals[index] += record.keyDurations[index] }
+            }
         }
-        
-        for record in records {
-            let startSeconds = Int(record.intervalStart.timeIntervalSince(firstRecord.intervalStart).rounded(.down))
-            let endSeconds = Int(record.intervalEnd.timeIntervalSince(firstRecord.intervalStart).rounded(.down))
-            let intervalLabel = "\(startSeconds)s - \(endSeconds)s"
-            
-            csv += [
-                intervalLabel,
-                formatNumber(record.key1Duration),
-                formatNumber(record.key2Duration)
-            ].joined(separator: ",") + "\n"
-        }
-        
-        let totalKey1 = records.reduce(0) { $0 + $1.key1Duration }
-        let totalKey2 = records.reduce(0) { $0 + $1.key2Duration }
-        
-        csv += "\n"
-        csv += "TOTAL,"
-        csv += formatNumber(totalKey1)
-        csv += ","
-        csv += formatNumber(totalKey2)
-        csv += "\n"
-        
+        csv += "\n" + (["TOTAL"] + totals.map(formatNumber)).joined(separator: ",") + "\n"
         return csv
     }
-    
+
     private static func escapeCSV(_ value: String) -> String {
         let escaped = value.replacingOccurrences(of: "\"", with: "\"\"")
         guard escaped.contains(where: { ",\n\r\"".contains($0) }) else { return escaped }

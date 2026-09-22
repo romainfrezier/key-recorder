@@ -2,7 +2,7 @@
 
 # 🔑 Key Recorder
 
-**A private macOS timer for measuring two keyboard-controlled events**
+**A private macOS timer for measuring up to seven keyboard-controlled events**
 
 [![macOS 15.1+](https://img.shields.io/badge/macOS-15.1%2B-111827?logo=apple&logoColor=white)](https://www.apple.com/macos/)
 [![Swift 5](https://img.shields.io/badge/Swift-5-F05138?logo=swift&logoColor=white)](https://swift.org)
@@ -28,7 +28,7 @@
 ## What Key Recorder does
 
 Key Recorder is a native, open-source macOS app for short, controlled
-observations. Assign a meaning to two physical keys, hold one while an event
+observations. Assign a meaning to one to seven physical keys, hold one while an event
 is happening, and get a clean CSV showing the duration accumulated by each key
 over time intervals.
 
@@ -37,7 +37,7 @@ It is useful for:
 - animal-behaviour and laboratory observations;
 - UX or accessibility studies;
 - productivity and workflow experiments;
-- any protocol where an operator needs two simple event markers.
+- any protocol where an operator needs up to seven simple event markers.
 
 Key Recorder does **not** record what you type, identify people, or send data
 over the network. It listens only while the app is open and a recording is in
@@ -49,7 +49,7 @@ progress, then keeps the result on your Mac.
 
 ## Highlights
 
-- **Two configurable event keys** with custom names and physical-key detection.
+- **One to seven configurable event keys** with custom names and physical-key detection.
 - **Duration-based measurements** split into configurable intervals.
 - **Live recording status** with start, stop, and early-stop support.
 - **Portable CSV exports** with stable headers, interval labels, decimal values, and
@@ -90,19 +90,16 @@ open key-recorder.xcodeproj
 
 Run the app with **⌘R**. Run the test suite with **⌘U**.
 
-For a reproducible local DMG after building an archive:
-
-```bash
-./scripts/package-dmg.sh 1.1.3 \
-  "/path/to/Key Recorder.app" \
-  "/path/to/output/Key-Recorder-1.1.3.dmg"
-```
+The [distribution guide](docs/PACKAGING.md) covers universal Release builds,
+verified DMGs, GitHub release assets, and optional Apple notarization. The
+**Quality** workflow uploads a versioned DMG and SHA-256 checksum after its
+tests and packaging checks pass.
 
 ## First recording
 
 1. Open **Key Recorder → Preferences…** with **⌘,** if you want to change the
    language, appearance, or recording defaults.
-2. Choose two keys and give them meaningful names, such as `Food dispenser`
+2. Use **Add key** to choose up to seven keys and give them meaningful names, such as `Food dispenser`
    and `Lever`.
 3. Use **Detect…** when the physical key is not obvious, especially with a
    non-US keyboard layout.
@@ -208,7 +205,7 @@ Recent changes are documented in [CHANGELOG.md](CHANGELOG.md).
 
 - No analytics or telemetry.
 - No cloud account and no network upload.
-- No general keyboard log: only the two selected key codes are used during a
+- No general keyboard log: only the selected key codes are used during a
   recording.
 - Transparent permission handling before monitoring begins.
 - Local archive files remain under the user's macOS Application Support folder.

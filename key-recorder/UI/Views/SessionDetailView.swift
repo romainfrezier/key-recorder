@@ -106,19 +106,26 @@ struct SessionDetailView: View {
                 if let preview {
                     Table(preview.rows) {
                         TableColumn("Interval") { row in Text(row.interval) }
-                        TableColumn(preview.key1Name) { row in Text(row.key1Duration, format: .number.precision(.fractionLength(3))) }
-                        TableColumn(preview.key2Name) { row in Text(row.key2Duration, format: .number.precision(.fractionLength(3))) }
+                        TableColumnForEach(Array(preview.keyNames.indices), id: \.self) { index in
+                            TableColumn(preview.keyNames[index]) { row in
+                                Text(row.keyDurations[index], format: .number.precision(.fractionLength(3)))
+                            }
+                            .width(min: 100, ideal: 130)
+                        }
                     }
                     .frame(minHeight: 180, maxHeight: 360)
 
-                    HStack {
-                        Text("TOTAL")
-                            .fontWeight(.semibold)
-                        Spacer()
-                        Text("\(preview.totalKey1, specifier: "%.3f") s")
-                        Text("\(preview.totalKey2, specifier: "%.3f") s")
+                    Text("TOTAL").fontWeight(.semibold)
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 130))], alignment: .leading) {
+                        ForEach(preview.keyNames.indices, id: \.self) { index in
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(preview.keyNames[index]).font(.caption).foregroundStyle(.secondary)
+                                Text("\(preview.totals[index], specifier: "%.3f") s")
+                                    .monospacedDigit()
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
                     }
-                    .font(.system(.body, design: .monospaced))
                 } else {
                     Label("The archived CSV cannot be previewed.", systemImage: "exclamationmark.triangle")
                         .foregroundStyle(.secondary)

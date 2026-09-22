@@ -10,6 +10,5 @@ import Foundation
 struct IntervalRecord {
     let intervalStart: Date
     let intervalEnd: Date
-    let key1Duration: TimeInterval
-    let key2Duration: TimeInterval
+    let keyDurations: [TimeInterval]
 }

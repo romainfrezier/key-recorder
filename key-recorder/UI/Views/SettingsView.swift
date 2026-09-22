@@ -62,14 +62,11 @@ struct SettingsView: View {
                 .foregroundStyle(.secondary)
 
             TextField("Duration (seconds)", text: $appState.durationText)
+                .disabled(appState.isRecording)
             TextField("Interval (seconds)", text: $appState.intervalText)
+                .disabled(appState.isRecording)
 
-            keySetting(title: "Key 1", name: $appState.key1Name, text: appState.key1Text) {
-                appState.captureKey1()
-            }
-            keySetting(title: "Key 2", name: $appState.key2Name, text: appState.key2Text) {
-                appState.captureKey2()
-            }
+            KeyConfigurationView()
 
         }
         .formStyle(.grouped)
@@ -107,23 +104,4 @@ struct SettingsView: View {
         return String(format: format, version)
     }
 
-    private func keySetting(
-        title: String,
-        name: Binding<String>,
-        text: String,
-        capture: @escaping () -> Void
-    ) -> some View {
-        HStack {
-            VStack(alignment: .leading) {
-                Text(title)
-                Text("Current key: \(text)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            TextField("Name", text: name)
-                .frame(width: 120)
-            Button("Detect…", action: capture)
-        }
-    }
 }

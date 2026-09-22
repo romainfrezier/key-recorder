@@ -17,7 +17,7 @@ enum AppError: LocalizedError {
 
     var localizationKey: String {
         switch self {
-        case .invalidKey: return "Please enter two simple supported keys (example: a, b, 1)."
+        case .invalidKey: return "Choose 1 to 7 different supported keys (example: a, b, 1)."
         case .invalidDuration: return "Duration must be a positive number."
         case .invalidInterval: return "Interval must be a positive number."
         case .intervalGreaterThanDuration: return "Interval cannot be greater than duration."
@@ -29,7 +29,7 @@ enum AppError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidKey:
-            return "Please enter two simple supported keys (example: a, b, 1)."
+            return "Choose 1 to 7 different supported keys (example: a, b, 1)."
         case .invalidDuration:
             return "Duration must be a positive number."
         case .invalidInterval:

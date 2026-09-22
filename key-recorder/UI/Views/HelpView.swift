@@ -5,11 +5,11 @@ struct HelpView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 helpSection("Start an observation", systemImage: "play.circle") {
-                    Text("Choose two event keys, give them meaningful names, set the duration and interval, then press Start Recording. Hold each key while its event is happening and release it when the event ends.")
+                    Text("Choose 1 to 7 event keys with Add key, give them meaningful names, set the duration and interval, then press Start Recording. Hold each key while its event is happening and release it when the event ends.")
                 }
 
                 helpSection("Permissions", systemImage: "lock.shield") {
-                    Text("macOS asks for Input Monitoring so Key Recorder can receive the two selected keys outside its own window. Accessibility is not required because the app only listens and never changes keyboard events. The app records only those keys during an active session and keeps the CSV on this Mac.")
+                    Text("macOS asks for Input Monitoring so Key Recorder can receive the selected keys outside its own window. Accessibility is not required because the app only listens and never changes keyboard events. The app records only those keys during an active session and keeps the CSV on this Mac.")
                 }
 
                 helpSection("Shortcuts", systemImage: "command") {

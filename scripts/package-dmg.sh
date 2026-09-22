@@ -5,7 +5,15 @@ VERSION="${1:?Usage: package-dmg.sh VERSION APP_PATH OUTPUT_PATH}"
 APP_PATH="${2:?Usage: package-dmg.sh VERSION APP_PATH OUTPUT_PATH}"
 OUTPUT_PATH="${3:?Usage: package-dmg.sh VERSION APP_PATH OUTPUT_PATH}"
 CODESIGN_IDENTITY="${CODESIGN_IDENTITY:--}"
+NOTARYTOOL_PROFILE="${NOTARYTOOL_PROFILE:-}"
 ENTITLEMENTS="${ENTITLEMENTS:-$(cd "$(dirname "$0")/.." && pwd)/key-recorder/key_recorder.entitlements}"
+
+[[ "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || { echo "Expected a release version such as 1.2.0" >&2; exit 2; }
+[[ "$(basename "$OUTPUT_PATH")" == "KeyRecorder-$VERSION.dmg" ]] || { echo "Expected output named KeyRecorder-$VERSION.dmg" >&2; exit 2; }
+if [[ -n "$NOTARYTOOL_PROFILE" && "$CODESIGN_IDENTITY" == "-" ]]; then
+    echo "Notarization requires a Developer ID Application identity" >&2
+    exit 2
+fi
 
 [[ -d "$APP_PATH" ]] || { echo "Application not found: $APP_PATH" >&2; exit 1; }
 [[ -f "$ENTITLEMENTS" ]] || { echo "Entitlements not found: $ENTITLEMENTS" >&2; exit 1; }
@@ -37,6 +45,15 @@ hdiutil create \
     -ov \
     -format UDZO \
     "$OUTPUT_PATH" >/dev/null
+
+if [[ "$CODESIGN_IDENTITY" != "-" ]]; then
+    codesign --force --sign "$CODESIGN_IDENTITY" --timestamp "$OUTPUT_PATH"
+fi
+if [[ -n "$NOTARYTOOL_PROFILE" ]]; then
+    xcrun notarytool submit "$OUTPUT_PATH" --keychain-profile "$NOTARYTOOL_PROFILE" --wait
+    xcrun stapler staple "$OUTPUT_PATH"
+    xcrun stapler validate "$OUTPUT_PATH"
+fi
 
 hdiutil verify "$OUTPUT_PATH" >/dev/null
 (
