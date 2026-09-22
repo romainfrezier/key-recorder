@@ -1,11 +1,11 @@
 # Key Recorder — User Guide for Researchers
 
 Key Recorder is designed for short, controlled experiments where a researcher
-needs to record when one of two events occurs. The event is represented by a
+needs to record when one or more of up to seven events occur. The event is represented by a
 keyboard key pressed by the researcher during the observation.
 
 It does not identify a person, interpret what is typed, or send data anywhere.
-It measures the time for which the two selected keys are held and saves the
+It measures the time for which the selected keys are held and saves the
 result as a CSV file on the Mac. Key Recorder also keeps a local archive and a
 searchable catalogue so that the result can be reviewed and exported again
 later.
@@ -25,12 +25,20 @@ experiment identifier, and observation conditions in your lab notebook. You
 can also enter this information in the session details after the observation;
 Key Recorder keeps it in its local catalogue next to the archived CSV.
 
+## Installing an update
+
+Download the new DMG from the official GitHub Releases page, quit Key Recorder,
+and drag **Key Recorder** into **Applications**, replacing the previous app.
+Your saved settings and local session archive remain in place. Reopen the app
+and check Input Monitoring before the next observation; macOS may ask you to
+authorize the updated application again.
+
 ## First setup
 
 1. Open Key Recorder.
 2. Open **Key Recorder → Preferences…** with `⌘,`.
 3. In **General**, choose English, French, or Italian if needed.
-4. In **Recording**, choose the two keys and give them meaningful names such
+4. In **Recording**, add or remove event keys (1 to 7) and give them meaningful names such
    as `Food dispenser` and `Lever`.
 5. Use **Detect…** if you are unsure which physical key macOS receives. This
    is recommended for non-US keyboards.
@@ -41,6 +49,16 @@ Key Recorder keeps it in its local catalogue next to the archived CSV.
 
 The application remembers these choices for the next session. Use
 **Reset Recording Settings** in Preferences to return to the defaults.
+
+Two keys are configured initially. Use **Add key** for another event, or the
+minus button on a row to remove it. Each physical key must be different.
+The number of keys and their names are remembered; existing two-key settings
+and CSV files continue to work.
+
+Several keys can be held at the same time: each has its own duration counter
+and CSV column, in the same order as the configuration. Before an experiment,
+try your full combination on the actual keyboard: some keyboards cannot report
+seven simultaneous presses. The live counters show which keys macOS receives.
 
 ## Sessions and the local archive
 
@@ -75,7 +93,7 @@ archive cleanup is a separate operation.
 ## Permissions
 
 macOS protects global keyboard monitoring. Key Recorder uses a passive event tap
-and needs **Input Monitoring** to receive the two selected keys while a
+and needs **Input Monitoring** to receive the selected keys while a
 measurement is being prepared or recorded.
 
 When macOS opens System Settings, enable Key Recorder under
@@ -115,8 +133,8 @@ TOTAL,20.550,14.200
 - Each row is one analysis interval.
 - Values are durations in seconds, not numbers of interactions.
 - `TOTAL` is the sum of each key's durations across the observation.
-- A participant can interact with another activity while neither key is
-  pressed; that time appears as zero for both configured events.
+- A participant can interact with another activity while no key is
+  pressed; that time appears as zero for all configured events.
 - The CSV is suitable for spreadsheet software, R, Python, and other analysis
   tools.
 
@@ -131,7 +149,7 @@ records:
 
 - experiment and subject identifiers;
 - date, start time, operator, and observation conditions;
-- the meaning of Key 1 and Key 2;
+- the meaning of each configured key;
 - duration and interval;
 - whether the file is complete or `-partial`;
 - any interruption, permission change, or operator note.

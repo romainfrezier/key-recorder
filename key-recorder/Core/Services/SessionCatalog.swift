@@ -127,8 +127,8 @@ final class SessionCatalog: ObservableObject {
             startedAt: nil,
             endedAt: nil,
             archiveURL: destinationURL,
-            key1Name: preview.key1Name,
-            key2Name: preview.key2Name,
+            key1Name: preview.keyNames[0],
+            key2Name: preview.keyNames.dropFirst().first ?? "",
             duration: 0,
             interval: 0,
             checksum: values.checksum,
@@ -159,8 +159,8 @@ final class SessionCatalog: ObservableObject {
             startedAt: startedAt,
             endedAt: endedAt,
             archiveURL: archiveURL,
-            key1Name: config.key1Name,
-            key2Name: config.key2Name,
+            key1Name: config.keys[0].name,
+            key2Name: config.keys.dropFirst().first?.name ?? "",
             duration: config.duration,
             interval: config.interval,
             checksum: values.checksum,
@@ -267,6 +267,7 @@ final class SessionCatalog: ObservableObject {
         }
     }
 
+    // Legacy name columns remain for compatibility; the archived CSV owns all key names and values.
     private func insert(
         id: String,
         draft: SessionMetadataDraft,

@@ -3,20 +3,49 @@ name: Quality
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
   macos:
     runs-on: macos-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+      - name: Check distribution guards
+        run: scripts/test-distribution.sh
       - name: Test
         run: xcodebuild test -project key-recorder.xcodeproj -scheme key-recorder -destination 'platform=macOS' -only-testing:key-recorderTests -parallel-testing-enabled NO
       - name: Build release archive
         run: xcodebuild archive -project key-recorder.xcodeproj -scheme key-recorder -configuration Release -destination 'generic/platform=macOS' -archivePath "$RUNNER_TEMP/KeyRecorder.xcarchive" CODE_SIGNING_ALLOWED=NO ONLY_ACTIVE_ARCH=NO
-      - name: Package and verify ad hoc DMG
+      - name: Package and verify universal DMG
+        id: package
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
           APP_PATH="$RUNNER_TEMP/KeyRecorder.xcarchive/Products/Applications/key-recorder.app"
           VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP_PATH/Contents/Info.plist")
+          if [[ "$REF_TYPE" == "tag" && "$REF_NAME" != "v$VERSION" ]]; then
+            echo "Tag $REF_NAME does not match app version v$VERSION" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           scripts/package-dmg.sh "$VERSION" "$APP_PATH" "$RUNNER_TEMP/KeyRecorder-$VERSION.dmg"
           scripts/verify-dmg.sh "$VERSION" "$RUNNER_TEMP/KeyRecorder-$VERSION.dmg"
+      - name: Upload verified distribution assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: KeyRecorder-${{ steps.package.outputs.version }}-universal
+          path: |
+            ${{ runner.temp }}/KeyRecorder-${{ steps.package.outputs.version }}.dmg
+            ${{ runner.temp }}/KeyRecorder-${{ steps.package.outputs.version }}.dmg.sha256
+          if-no-files-found: error

@@ -19,7 +19,7 @@ struct KeyRecorderApp: App {
             ContentView()
                 .environmentObject(appState)
                 .environment(\.locale, appState.language.locale)
-                .frame(minWidth: 520, minHeight: 420)
+                .frame(minWidth: 820, minHeight: 520)
                 .preferredColorScheme(appState.appearance.colorScheme)
                 .onAppear {
                     appDelegate.appState = appState

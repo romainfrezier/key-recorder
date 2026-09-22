@@ -15,7 +15,7 @@ import CoreGraphics
 final class RecordingSession {
     var onTick: ((TimeInterval) -> Void)?
     var onFinished: ((Result<URL, Error>) -> Void)?
-    var onLiveUpdate: ((TimeInterval, TimeInterval) -> Void)?
+    var onLiveUpdate: (([TimeInterval]) -> Void)?
 
     private let config: RecordingConfig
     private let outputURL: URL
@@ -24,17 +24,8 @@ final class RecordingSession {
     private var endDate: Date?
     private var timer: Timer?
 
-    // Current physical state.
-    private var key1IsDown = false
-    private var key2IsDown = false
-
-    // Start date of the current press for each key.
-    private var key1PressStart: Date?
-    private var key2PressStart: Date?
-
-    // Accumulated pressed duration per interval.
-    private var key1Durations: [TimeInterval] = []
-    private var key2Durations: [TimeInterval] = []
+    private var pressStarts: [Date?] = []
+    private var durations: [[TimeInterval]] = []
     private var intervalCount: Int = 0
     private var didFinish = false
 
@@ -43,17 +34,12 @@ final class RecordingSession {
         self.outputURL = outputURL
     }
 
-    func start() {
-        let now = Date()
+    func start(at now: Date = Date()) {
         startDate = now
         endDate = now.addingTimeInterval(config.duration)
         intervalCount = Int(ceil(config.duration / config.interval))
-        key1Durations = Array(repeating: 0, count: intervalCount)
-        key2Durations = Array(repeating: 0, count: intervalCount)
-        key1PressStart = nil
-        key2PressStart = nil
-        key1IsDown = false
-        key2IsDown = false
+        durations = Array(repeating: Array(repeating: 0, count: intervalCount), count: config.keys.count)
+        pressStarts = Array(repeating: nil, count: config.keys.count)
         didFinish = false
 
         let timer = Timer(timeInterval: 0.1, repeats: true) { [weak self] _ in
@@ -65,79 +51,43 @@ final class RecordingSession {
         self.timer = timer
     }
 
-    func handleEvent(keyCode: CGKeyCode, isDown: Bool) {
-        guard !didFinish, let startDate, let endDate else { return }
+    func handleEvent(keyCode: CGKeyCode, isDown: Bool, at now: Date = Date()) {
+        guard !didFinish, let startDate, let endDate,
+              now >= startDate, now <= endDate,
+              let index = config.keys.firstIndex(where: { $0.code == keyCode }) else { return }
 
-        let now = Date()
-
-        // Ignore events completely outside the recording window.
-        if now < startDate || now > endDate {
-            return
-        }
-
-        if keyCode == config.key1Code {
-            if isDown {
-                if !key1IsDown {
-                    key1IsDown = true
-                    key1PressStart = now
-                }
-            } else {
-                if key1IsDown, let pressStart = key1PressStart {
-                    key1IsDown = false
-                    key1PressStart = nil
-                    accumulateDuration(
-                        from: pressStart,
-                        to: now,
-                        into: &key1Durations
-                    )
-                }
-            }
-        }
-
-        if keyCode == config.key2Code {
-            if isDown {
-                if !key2IsDown {
-                    key2IsDown = true
-                    key2PressStart = now
-                }
-            } else {
-                if key2IsDown, let pressStart = key2PressStart {
-                    key2IsDown = false
-                    key2PressStart = nil
-                    accumulateDuration(
-                        from: pressStart,
-                        to: now,
-                        into: &key2Durations
-                    )
-                }
-            }
+        if isDown {
+            // Repeated key-down events must not restart a held key's timer.
+            if pressStarts[index] == nil { pressStarts[index] = now }
+        } else if let pressStart = pressStarts[index] {
+            pressStarts[index] = nil
+            accumulateDuration(from: pressStart, to: now, keyIndex: index)
         }
     }
 
-    private func tick() {
+    func tick(at now: Date = Date()) {
         guard !didFinish, let endDate else { return }
 
-        let now = Date()
         let remaining = max(0, endDate.timeIntervalSince(now))
         onTick?(remaining)
 
         let totals = currentLiveTotals(at: now)
-        onLiveUpdate?(totals.0, totals.1)
+        onLiveUpdate?(totals)
 
         if now >= endDate {
             finish(at: endDate, partial: false)
         }
     }
 
-    func stop() {
+    func stop(at now: Date = Date()) {
         guard !didFinish else { return }
-        finish(at: min(Date(), endDate ?? Date()), partial: true)
+        finish(at: min(now, endDate ?? now), partial: true)
     }
 
     private func accumulateDuration(
         from pressStart: Date,
         to pressEnd: Date,
-        into durations: inout [TimeInterval]
+        keyIndex: Int
     ) {
         guard let recordingStart = startDate else { return }
 
@@ -157,7 +107,7 @@ final class RecordingSession {
             let overlapEnd = min(clampedEnd, intervalEnd)
 
             if overlapEnd > overlapStart {
-                durations[index] += overlapEnd.timeIntervalSince(overlapStart)
+                durations[keyIndex][index] += overlapEnd.timeIntervalSince(overlapStart)
             }
         }
     }
@@ -175,17 +125,12 @@ final class RecordingSession {
 
         let effectiveEndDate = min(finishDate, endDate)
 
-        // Close any key still being held when the recording ends.
-        if key1IsDown, let pressStart = key1PressStart {
-            accumulateDuration(from: pressStart, to: effectiveEndDate, into: &key1Durations)
-            key1IsDown = false
-            key1PressStart = nil
-        }
-
-        if key2IsDown, let pressStart = key2PressStart {
-            accumulateDuration(from: pressStart, to: effectiveEndDate, into: &key2Durations)
-            key2IsDown = false
-            key2PressStart = nil
+        // Close every held key independently, including a partial recording.
+        for index in config.keys.indices {
+            if let pressStart = pressStarts[index] {
+                accumulateDuration(from: pressStart, to: effectiveEndDate, keyIndex: index)
+                pressStarts[index] = nil
+            }
         }
 
         do {
@@ -221,8 +166,7 @@ final class RecordingSession {
                 IntervalRecord(
                     intervalStart: intervalStart,
                     intervalEnd: realEnd,
-                    key1Duration: key1Durations[index],
-                    key2Duration: key2Durations[index]
+                    keyDurations: durations.map { $0[index] }
                 )
             )
         }
@@ -230,24 +174,11 @@ final class RecordingSession {
         return records
     }
     
-    private func currentLiveTotals(at now: Date) -> (TimeInterval, TimeInterval) {
-        let storedKey1 = key1Durations.reduce(0, +)
-        let storedKey2 = key2Durations.reduce(0, +)
-
-        let liveKey1: TimeInterval
-        if key1IsDown, let pressStart = key1PressStart {
-            liveKey1 = max(0, now.timeIntervalSince(pressStart))
-        } else {
-            liveKey1 = 0
+    private func currentLiveTotals(at now: Date) -> [TimeInterval] {
+        let effectiveNow = min(now, endDate ?? now)
+        return config.keys.indices.map { index in
+            let held = pressStarts[index].map { max(0, effectiveNow.timeIntervalSince($0)) } ?? 0
+            return durations[index].reduce(0, +) + held
         }
-
-        let liveKey2: TimeInterval
-        if key2IsDown, let pressStart = key2PressStart {
-            liveKey2 = max(0, now.timeIntervalSince(pressStart))
-        } else {
-            liveKey2 = 0
-        }
-
-        return (storedKey1 + liveKey1, storedKey2 + liveKey2)
     }
 }

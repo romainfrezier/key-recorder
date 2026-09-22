@@ -92,37 +92,14 @@ extension View {
 
 @MainActor
 final class AppState: ObservableObject {
-    @Published var key1Text: String = "a" {
-        didSet {
-            if key1Text != oldValue {
-                key1CapturedCode = nil
-                if !isLoadingSettings {
-                    defaults.removeObject(forKey: DefaultsKey.key1Code)
-                }
-            }
-            persist()
-        }
-    }
-    @Published var key2Text: String = "b" {
-        didSet {
-            if key2Text != oldValue {
-                key2CapturedCode = nil
-                if !isLoadingSettings {
-                    defaults.removeObject(forKey: DefaultsKey.key2Code)
-                }
-            }
-            persist()
-        }
-    }
-    @Published var key1Name: String = "Key 1" { didSet { persist() } }
-    @Published var key2Name: String = "Key 2" { didSet { persist() } }
+    @Published var keys: [KeyDefinition] = KeyDefinition.defaults { didSet { persist() } }
+    @Published private(set) var capturingKeyID: UUID?
     @Published var durationText: String = "10" { didSet { persist() } }
     @Published var intervalText: String = "2" { didSet { persist() } }
     @Published var appearance: AppearanceMode = .system { didSet { persist() } }
     @Published var language: AppLanguage = .english { didSet { persist() } }
     @Published var settingsTab: SettingsTab = .general
-    @Published var liveKey1Duration: TimeInterval = 0
-    @Published var liveKey2Duration: TimeInterval = 0
+    @Published var liveKeyDurations: [TimeInterval] = []
     @Published var csvURL: URL?
 
     @Published var isRecording: Bool = false
@@ -143,34 +120,23 @@ final class AppState: ObservableObject {
     private var activeSessionStartedAt: Date?
     private var activeSessionConfig: RecordingConfig?
     private var activeExportURL: URL?
-    private var capturingKeyTarget: Int?
-    private var key1CapturedCode: CGKeyCode?
-    private var key2CapturedCode: CGKeyCode?
     private var isLoadingSettings = true
 
-    private let defaults = UserDefaults.standard
+    private let defaults: UserDefaults
 
     private enum DefaultsKey {
-        static let key1Text = "key1Text"
-        static let key2Text = "key2Text"
-        static let key1Name = "key1Name"
-        static let key2Name = "key2Name"
         static let duration = "duration"
         static let interval = "interval"
         static let appearance = "appearance"
         static let language = "language"
         static let csvURL = "csvURL"
-        static let key1Code = "key1Code"
-        static let key2Code = "key2Code"
     }
 
-    init() {
-        sessionCatalog = SessionCatalog()
-        sessions = sessionCatalog.sessions
-        key1Text = defaults.string(forKey: DefaultsKey.key1Text) ?? key1Text
-        key2Text = defaults.string(forKey: DefaultsKey.key2Text) ?? key2Text
-        key1Name = defaults.string(forKey: DefaultsKey.key1Name) ?? key1Name
-        key2Name = defaults.string(forKey: DefaultsKey.key2Name) ?? key2Name
+    init(defaults: UserDefaults = .standard, sessionCatalog: SessionCatalog? = nil) {
+        self.defaults = defaults
+        self.sessionCatalog = sessionCatalog ?? SessionCatalog()
+        sessions = self.sessionCatalog.sessions
+        keys = KeyDefinition.load(from: defaults)
         durationText = defaults.string(forKey: DefaultsKey.duration) ?? durationText
         intervalText = defaults.string(forKey: DefaultsKey.interval) ?? intervalText
         if let rawAppearance = defaults.string(forKey: DefaultsKey.appearance) {
@@ -182,13 +148,6 @@ final class AppState: ObservableObject {
         if let savedURL = defaults.url(forKey: DefaultsKey.csvURL) {
             csvURL = savedURL
         }
-        if let code = defaults.object(forKey: DefaultsKey.key1Code) as? NSNumber {
-            key1CapturedCode = CGKeyCode(code.uint16Value)
-        }
-        if let code = defaults.object(forKey: DefaultsKey.key2Code) as? NSNumber {
-            key2CapturedCode = CGKeyCode(code.uint16Value)
-        }
-
         monitor.onEvent = { [weak self] keyCode, isDown in
             Task { @MainActor [weak self] in
                 self?.receiveEvent(keyCode: keyCode, isDown: isDown)
@@ -316,18 +275,36 @@ final class AppState: ObservableObject {
         }
     }
 
-    func captureKey1() { beginKeyCapture(target: 1) }
+    func addKey() {
+        guard !isRecording, keys.count < RecordingConfig.maximumKeys else { return }
+        stopCapturingKey()
+        let usedCodes = Set(keys.compactMap(\.code))
+        let text = ["a", "b", "c", "d", "e", "f", "g", "h"].first {
+            !usedCodes.contains(KeyParser.keyCode(from: $0)!)
+        }!
+        let number = (1...RecordingConfig.maximumKeys).first { number in
+            !keys.contains { $0.name == "Key \(number)" }
+        } ?? keys.count + 1
+        keys.append(KeyDefinition(name: "Key \(number)", text: text))
+    }
 
-    func captureKey2() { beginKeyCapture(target: 2) }
+    func removeKey(id: UUID) {
+        guard !isRecording, keys.count > 1 else { return }
+        stopCapturingKey()
+        keys.removeAll { $0.id == id }
+    }
+
+    func captureKey(id: UUID) { beginKeyCapture(target: id) }
 
     func stopCapturingKey() {
-        capturingKeyTarget = nil
+        guard capturingKeyID != nil else { return }
+        capturingKeyID = nil
         monitor.stop()
-        statusMessage = "Ready"
+        statusMessage = localized("Ready")
     }
 
     func startRecording() {
-        guard !isRecording, capturingKeyTarget == nil else { return }
+        guard !isRecording, capturingKeyID == nil else { return }
 
         do {
             let config = try buildConfig()
@@ -346,17 +323,12 @@ final class AppState: ObservableObject {
             activeExportURL = destinationURL
 
             newSession.onTick = { [weak self] remaining in
-                Task { @MainActor in
-                    self?.remainingTime = remaining
-                    self?.statusMessage = "Recording..."
-                }
+                self?.remainingTime = remaining
+                self?.statusMessage = "Recording..."
             }
             
-            newSession.onLiveUpdate = { [weak self] key1Total, key2Total in
-                Task { @MainActor in
-                    self?.liveKey1Duration = key1Total
-                    self?.liveKey2Duration = key2Total
-                }
+            newSession.onLiveUpdate = { [weak self] totals in
+                self?.liveKeyDurations = totals
             }
 
             newSession.onFinished = { [weak self] result in
@@ -368,8 +340,7 @@ final class AppState: ObservableObject {
             remainingTime = config.duration
             statusMessage = "Recording..."
             permissionMessage = localized("Permissions granted ✅")
-            liveKey1Duration = 0
-            liveKey2Duration = 0
+            liveKeyDurations = Array(repeating: 0, count: config.keys.count)
             newSession.start()
         } catch {
             statusMessage = String(format: localized("Cannot start: %@"), localizedErrorMessage(error))
@@ -384,11 +355,11 @@ final class AppState: ObservableObject {
     var canOpenLastCSV: Bool { csvURL != nil && !isRecording }
 
     private func buildConfig() throws -> RecordingConfig {
-        guard let duration = TimeInterval(durationText), duration > 0 else {
+        guard let duration = TimeInterval(durationText), duration.isFinite, duration > 0 else {
             throw AppError.invalidDuration
         }
 
-        guard let interval = TimeInterval(intervalText), interval > 0 else {
+        guard let interval = TimeInterval(intervalText), interval.isFinite, interval > 0 else {
             throw AppError.invalidInterval
         }
 
@@ -396,25 +367,7 @@ final class AppState: ObservableObject {
             throw AppError.intervalGreaterThanDuration
         }
 
-        guard let key1Code = key1CapturedCode ?? KeyParser.keyCode(from: key1Text),
-              let key2Code = key2CapturedCode ?? KeyParser.keyCode(from: key2Text) else {
-            throw AppError.invalidKey
-        }
-
-        guard key1Code != key2Code else {
-            throw AppError.invalidKey
-        }
-
-        return RecordingConfig(
-            key1Name: key1Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Key 1" : key1Name,
-            key2Name: key2Name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Key 2" : key2Name,
-            key1Display: key1Text,
-            key2Display: key2Text,
-            key1Code: key1Code,
-            key2Code: key2Code,
-            duration: duration,
-            interval: interval
-        )
+        return try RecordingConfig(definitions: keys, duration: duration, interval: interval)
     }
 
     private func ensurePermissions() throws {
@@ -433,15 +386,15 @@ final class AppState: ObservableObject {
             .appendingPathComponent(defaultFileName())
     }
 
-    private func beginKeyCapture(target: Int) {
-        guard !isRecording else { return }
+    private func beginKeyCapture(target: UUID) {
+        guard !isRecording, keys.contains(where: { $0.id == target }) else { return }
         do {
             try ensurePermissions()
-            capturingKeyTarget = target
-            statusMessage = "Press a key to capture it..."
+            capturingKeyID = target
+            statusMessage = localized("Press a key to capture it...")
             try monitor.start()
         } catch {
-            capturingKeyTarget = nil
+            capturingKeyID = nil
             statusMessage = String(format: localized("Cannot capture key: %@"), localizedErrorMessage(error))
         }
     }
@@ -450,8 +403,7 @@ final class AppState: ObservableObject {
         isRecording = false
         monitor.stop()
         remainingTime = 0
-        liveKey1Duration = 0
-        liveKey2Duration = 0
+        liveKeyDurations = []
 
         guard let sessionID = activeSessionID,
               let config = activeSessionConfig,
@@ -507,20 +459,14 @@ final class AppState: ObservableObject {
     }
 
     private func receiveEvent(keyCode: CGKeyCode, isDown: Bool) {
-        if let target = capturingKeyTarget, isDown {
-            capturingKeyTarget = nil
+        if let target = capturingKeyID, isDown {
+            capturingKeyID = nil
             let displayName = KeyParser.displayName(for: keyCode)
-            if target == 1 {
-                key1Text = displayName
-                key1CapturedCode = keyCode
-                defaults.set(Int(keyCode), forKey: DefaultsKey.key1Code)
-            } else {
-                key2Text = displayName
-                key2CapturedCode = keyCode
-                defaults.set(Int(keyCode), forKey: DefaultsKey.key2Code)
-            }
+            guard let index = keys.firstIndex(where: { $0.id == target }) else { return }
+            keys[index].text = displayName
+            keys[index].capturedCode = keyCode
             monitor.stop()
-            statusMessage = "Key captured: \(displayName)"
+            statusMessage = String(format: localized("Key captured: %@"), displayName)
             return
         }
 
@@ -528,13 +474,14 @@ final class AppState: ObservableObject {
     }
 
     private func persist() {
-        defaults.set(key1Text, forKey: DefaultsKey.key1Text)
-        defaults.set(key2Text, forKey: DefaultsKey.key2Text)
-        defaults.set(key1Name, forKey: DefaultsKey.key1Name)
-        defaults.set(key2Name, forKey: DefaultsKey.key2Name)
+        guard !isLoadingSettings else { return }
+        if let data = try? JSONEncoder().encode(keys) {
+            defaults.set(data, forKey: "recordingKeys")
+        }
         defaults.set(durationText, forKey: DefaultsKey.duration)
         defaults.set(intervalText, forKey: DefaultsKey.interval)
         defaults.set(appearance.rawValue, forKey: DefaultsKey.appearance)
+        defaults.set(language.rawValue, forKey: DefaultsKey.language)
     }
 
     private func localized(_ key: String) -> String {
@@ -582,18 +529,12 @@ final class AppState: ObservableObject {
 
     func resetSettings() {
         guard !isRecording else { return }
-        key1Text = "a"
-        key2Text = "b"
-        key1Name = "Key 1"
-        key2Name = "Key 2"
+        stopCapturingKey()
+        keys = KeyDefinition.defaults
         durationText = "10"
         intervalText = "2"
         appearance = .system
         csvURL = nil
-        key1CapturedCode = nil
-        key2CapturedCode = nil
         defaults.removeObject(forKey: DefaultsKey.csvURL)
-        defaults.removeObject(forKey: DefaultsKey.key1Code)
-        defaults.removeObject(forKey: DefaultsKey.key2Code)
     }
 }

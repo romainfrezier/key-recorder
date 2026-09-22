@@ -81,15 +81,22 @@ private extension ContentView {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 headerSection
-                configurationSection
-                exportSection
+                if !appState.isRecording {
+                    configurationSection
+                    exportSection
+                }
                 statusSection
-                actionSection
             }
             .padding(24)
             .frame(maxWidth: 720, alignment: .leading)
         }
         .background(Color(nsColor: .windowBackgroundColor))
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            actionSection
+                .padding(.horizontal, 24)
+                .padding(.vertical, 14)
+                .background(.bar)
+        }
     }
 
     var headerSection: some View {
@@ -129,25 +136,7 @@ private extension ContentView {
     var configurationSection: some View {
         sectionCard(title: "Configuration", systemImage: "slider.horizontal.3") {
             VStack(alignment: .leading, spacing: 16) {
-                keyRow(
-                    title: "Key 1",
-                    nameBinding: $appState.key1Name,
-                    keyBinding: $appState.key1Text,
-                    defaultName: "Key 1",
-                    defaultKey: "a",
-                    capture: appState.captureKey1
-                )
-
-                Divider()
-
-                keyRow(
-                    title: "Key 2",
-                    nameBinding: $appState.key2Name,
-                    keyBinding: $appState.key2Text,
-                    defaultName: "Key 2",
-                    defaultKey: "b",
-                    capture: appState.captureKey2
-                )
+                KeyConfigurationView()
 
                 Divider()
 
@@ -173,7 +162,7 @@ private extension ContentView {
     var exportSection: some View {
         sectionCard(title: "CSV Export", systemImage: "doc.text") {
             VStack(alignment: .leading, spacing: 12) {
-                Text(appState.csvURL?.path ?? "No file selected. The app will use Downloads by default.")
+                Text(appState.csvURL?.path ?? String(localized: "No file selected. The app will use Downloads by default.", locale: appState.language.locale))
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
@@ -221,21 +210,17 @@ private extension ContentView {
                 }
 
                 if appState.isRecording {
-                    HStack(spacing: 12) {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 130))], alignment: .leading, spacing: 12) {
                         statusPill(
-                            title: "Remaining",
+                            title: String(localized: "Remaining", locale: appState.language.locale),
                             value: "\(Int(ceil(appState.remainingTime))) s"
                         )
-
-                        statusPill(
-                            title: appState.key1Name,
-                            value: "\(String(format: "%.2f", appState.liveKey1Duration)) s"
-                        )
-
-                        statusPill(
-                            title: appState.key2Name,
-                            value: "\(String(format: "%.2f", appState.liveKey2Duration)) s"
-                        )
+                        ForEach(Array(appState.keys.enumerated()), id: \.element.id) { index, key in
+                            statusPill(
+                                title: key.name,
+                                value: "\(String(format: "%.2f", appState.liveKeyDurations.indices.contains(index) ? appState.liveKeyDurations[index] : 0)) s"
+                            )
+                        }
                     }
                 }
             }
@@ -259,6 +244,7 @@ private extension ContentView {
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
+            .disabled(appState.capturingKeyID != nil)
             .keyboardShortcut(.defaultAction)
         }
     }
@@ -284,50 +270,9 @@ private extension ContentView {
         .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 
-    func keyRow(
-        title: String,
-        nameBinding: Binding<String>,
-        keyBinding: Binding<String>,
-        defaultName: String,
-        defaultKey: String,
-        capture: @escaping () -> Void
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(LocalizedStringKey(title))
-                .font(.headline)
-
-            HStack(alignment: .top, spacing: 12) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Display name")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    TextField(defaultName, text: nameBinding)
-                        .textFieldStyle(.roundedBorder)
-                        .disabled(appState.isRecording)
-                }
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Keyboard key")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    HStack {
-                        TextField(defaultKey, text: keyBinding)
-                            .textFieldStyle(.roundedBorder)
-                            .frame(maxWidth: 100)
-                            .disabled(appState.isRecording)
-                        Button("Detect") { capture() }
-                            .disabled(appState.isRecording)
-                    }
-                }
-            }
-        }
-    }
-
     func labeledField(_ title: String, text: Binding<String>, placeholder: String) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
@@ -364,6 +309,77 @@ private extension ContentView {
         .padding(.horizontal, 12)
         .background(Color(nsColor: .windowBackgroundColor))
         .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
+}
+
+/// The same editor is used before an observation and in Recording settings.
+struct KeyConfigurationView: View {
+    @EnvironmentObject private var appState: AppState
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Event keys").font(.headline)
+                Spacer()
+                Text("\(appState.keys.count) / \(RecordingConfig.maximumKeys)")
+                    .font(.caption.monospacedDigit())
+                    .foregroundStyle(.secondary)
+                    .accessibilityLabel(Text("\(appState.keys.count) keys configured"))
+            }
+
+            ForEach($appState.keys) { $key in
+                HStack(spacing: 10) {
+                    TextField("Display name", text: $key.name)
+                        .textFieldStyle(.roundedBorder)
+                        .labelsHidden()
+                        .accessibilityLabel("Display name")
+                    TextField("Keyboard key", text: $key.text)
+                        .textFieldStyle(.roundedBorder)
+                        .labelsHidden()
+                        .frame(width: 90)
+                        .accessibilityLabel("Keyboard key")
+                    Button {
+                        if appState.capturingKeyID == key.id {
+                            appState.stopCapturingKey()
+                        } else {
+                            appState.captureKey(id: key.id)
+                        }
+                    } label: {
+                        Text(appState.capturingKeyID == key.id ? "Cancel" : "Detect")
+                            .frame(minWidth: 50)
+                    }
+                    Button {
+                        appState.removeKey(id: key.id)
+                    } label: {
+                        Image(systemName: "minus.circle")
+                    }
+                    .buttonStyle(.borderless)
+                    .foregroundStyle(.secondary)
+                    .help("Remove key")
+                    .accessibilityLabel(Text("Remove key: \(key.name)"))
+                    .disabled(appState.keys.count == 1)
+                }
+            }
+
+            HStack {
+                Button {
+                    appState.addKey()
+                } label: {
+                    Label("Add key", systemImage: "plus")
+                }
+                .disabled(appState.keys.count >= RecordingConfig.maximumKeys)
+                Spacer()
+                if appState.capturingKeyID != nil {
+                    Text("Press a key to capture it...")
+                        .foregroundStyle(.tint)
+                } else {
+                    Text("1 to 7 keys, recorded independently.")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .font(.caption)
+        }
+        .disabled(appState.isRecording)
     }
 }
 

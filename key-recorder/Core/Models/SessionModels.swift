@@ -54,13 +54,10 @@ struct CSVPreview: Equatable {
     struct Row: Identifiable, Equatable {
         let id = UUID()
         let interval: String
-        let key1Duration: Double
-        let key2Duration: Double
+        let keyDurations: [Double]
     }
 
-    let key1Name: String
-    let key2Name: String
+    let keyNames: [String]
     let rows: [Row]
-    let totalKey1: Double
-    let totalKey2: Double
+    let totals: [Double]
 }

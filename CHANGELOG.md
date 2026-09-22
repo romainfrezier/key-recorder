@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Configure one to seven independent event keys, with compact add/remove controls shared by the main window and Settings.
+- Record simultaneous presses and export all configured events to CSV, including partial recordings and archived previews.
+- Download verified universal DMG and SHA-256 artifacts from the Quality workflow, with optional Developer ID signing and notarization for local packages.
+
+### Changed
+- Keep recording controls visible and show an adaptive grid of live event durations.
+- Preserve existing two-key settings and CSV archives when upgrading.
+- Validate versioned package names, tag/app version agreement, and the exact DMG checksum before distribution.
+
 ## [1.1.4] - 2026-08-23
 
 ### Fixed
