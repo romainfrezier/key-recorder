@@ -1,88 +1,186 @@
-import { useEffect } from 'react'
-import { Link, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { localeFromPath, locales, type Locale } from './i18n'
+import { getPageMeta, localeFromPath, locales, type Locale } from './i18n'
 import './App.css'
 
 const releaseUrl = 'https://github.com/romainfrezier/key-recorder/releases/latest'
+const screenshotUrl = `${import.meta.env.BASE_URL}screenshots/key-recorder-configuration.png`
+const languageNames = { en: 'English', fr: 'Français', it: 'Italiano' }
+
+function AppIcon() {
+  return <img className="brand-mark" src={`${import.meta.env.BASE_URL}key-recorder-icon.png`} alt="" width="36" height="36" />
+}
 
 function useSiteMeta() {
   const { i18n } = useTranslation()
   const { pathname } = useLocation()
+  const previousPath = useRef(pathname)
   const locale = localeFromPath(pathname)
   useEffect(() => {
-    const updateMeta = () => {
-      document.documentElement.lang = locale
-      document.title = i18n.t('seo.title')
-      document.querySelector('meta[name="description"]')?.setAttribute('content', i18n.t('seo.description'))
+    const { title, description } = getPageMeta(pathname)
+    document.documentElement.lang = locale
+    document.title = title
+    for (const [selector, value] of [
+      ['meta[name="description"]', description],
+      ['meta[property="og:title"]', title],
+      ['meta[property="og:description"]', description],
+      ['meta[name="twitter:title"]', title],
+      ['meta[name="twitter:description"]', description],
+    ]) document.querySelector(selector)?.setAttribute('content', value)
+    const base = new URL(import.meta.env.BASE_URL, import.meta.env.VITE_SITE_URL || window.location.origin)
+    const url = new URL(pathname.replace(/^\//, ''), base).href
+    document.querySelector('link[rel="canonical"]')?.setAttribute('href', url)
+    document.querySelector('meta[property="og:url"]')?.setAttribute('content', url)
+    document.querySelectorAll<HTMLLinkElement>('link[rel="alternate"]').forEach((link) => {
+      link.href = new URL(link.hreflang === 'x-default' ? '' : `${link.hreflang}${pathname.replace(/^\/(en|fr|it)/, '')}`, base).href
+    })
+    void i18n.changeLanguage(locale)
+    if (previousPath.current !== pathname) {
+      window.scrollTo({ top: 0, behavior: 'instant' })
+      document.querySelector<HTMLElement>('main')?.focus({ preventScroll: true })
+      previousPath.current = pathname
     }
-    if (i18n.language === locale) updateMeta()
-    else void i18n.changeLanguage(locale).then(updateMeta)
-  }, [i18n, locale])
+  }, [i18n, locale, pathname])
   return locale
 }
 
 function Header({ locale }: { locale: Locale }) {
-  const { t } = useTranslation()
-  const path = useLocation().pathname
-  const sectionPath = path.replace(/^\/(en|fr|it)/, '') || '/'
+  const { t } = useTranslation(undefined, { lng: locale })
+  const sectionPath = useLocation().pathname.replace(/^\/(en|fr|it)/, '') || '/'
   return <header className="site-header">
-    <Link className="brand" to={`/${locale}/`} aria-label="Key Recorder home"><img className="brand-mark" src={`${import.meta.env.BASE_URL}key-recorder-icon.png`} alt="" /><span>Key Recorder</span></Link>
-    <nav className="main-nav" aria-label={t('nav.label')}><Link to={`/${locale}/researchers/`}>{t('nav.researchers')}</Link><Link to={`/${locale}/privacy/`}>{t('nav.privacy')}</Link><Link to={`/${locale}/download/`}>{t('nav.download')}</Link></nav>
-    <div className="header-actions"><div className="language-switcher" aria-label={t('language.label')}>{locales.map((item) => <Link key={item} className={item === locale ? 'active' : ''} to={`/${item}${sectionPath}`} hrefLang={item}>{item.toUpperCase()}</Link>)}</div><a className="button button-small button-dark" href={releaseUrl} target="_blank" rel="noreferrer">{t('nav.cta')}</a></div>
+    <Link className="brand" to={`/${locale}/`}><AppIcon /><span translate="no">Key Recorder</span></Link>
+    <nav className="main-nav" aria-label={t('nav.label')}>
+      <NavLink to={`/${locale}/researchers/`}>{t('nav.researchers')}</NavLink>
+      <NavLink to={`/${locale}/privacy/`}>{t('nav.privacy')}</NavLink>
+      <NavLink to={`/${locale}/download/`}>{t('nav.download')}</NavLink>
+    </nav>
+    <nav className="language-switcher" aria-label={t('language.label')}>
+      {locales.map((item) => <Link key={item} aria-current={item === locale ? 'page' : undefined} to={`/${item}${sectionPath}`} hrefLang={item} lang={item} aria-label={languageNames[item]}>{item.toUpperCase()}</Link>)}
+    </nav>
   </header>
 }
 
 function Footer({ locale }: { locale: Locale }) {
-  const { t } = useTranslation()
-  return <footer className="site-footer"><div><div className="footer-brand"><img className="brand-mark" src={`${import.meta.env.BASE_URL}key-recorder-icon.png`} alt="" /> Key Recorder</div><p>{t('footer.tagline')}</p></div><div className="footer-links"><Link to={`/${locale}/researchers/`}>{t('nav.researchers')}</Link><Link to={`/${locale}/privacy/`}>{t('nav.privacy')}</Link><a href="https://github.com/romainfrezier/key-recorder" target="_blank" rel="noreferrer">GitHub ↗</a><a className="support-link" href="https://buymeacoffee.com/romainfrezier" target="_blank" rel="noreferrer">{t('footer.support')} ↗</a></div><div className="footer-note">{t('footer.license')}</div></footer>
+  const { t } = useTranslation(undefined, { lng: locale })
+  return <footer className="site-footer">
+    <div><Link className="brand" to={`/${locale}/`}><AppIcon /><span translate="no">Key Recorder</span></Link><p>{t('footer.tagline')}</p></div>
+    <div className="footer-links">
+      <Link to={`/${locale}/researchers/`}>{t('nav.researchers')}</Link>
+      <Link to={`/${locale}/privacy/`}>{t('nav.privacy')}</Link>
+      <a href="https://github.com/romainfrezier/key-recorder">GitHub</a>
+      <a href="https://buymeacoffee.com/romainfrezier">{t('footer.support')}</a>
+    </div>
+    <p className="footer-note">{t('footer.license')}</p>
+  </footer>
 }
 
 function StructuredData({ locale }: { locale: Locale }) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(undefined, { lng: locale })
   const data = [
     { '@context': 'https://schema.org', '@type': 'Organization', name: 'Key Recorder', url: 'https://key-recorder.com/', logo: `https://key-recorder.com${import.meta.env.BASE_URL}key-recorder-icon.png`, sameAs: ['https://github.com/romainfrezier/key-recorder', 'https://buymeacoffee.com/romainfrezier'] },
-    { '@context': 'https://schema.org', '@type': 'SoftwareApplication', name: 'Key Recorder', operatingSystem: 'macOS 15.1 or later', applicationCategory: 'DeveloperApplication', description: t('seo.description'), inLanguage: locale, url: `https://key-recorder.com/${locale}/`, downloadUrl: releaseUrl, offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } },
+    { '@context': 'https://schema.org', '@type': 'SoftwareApplication', name: 'Key Recorder', operatingSystem: 'macOS 15.1 or later', applicationCategory: 'UtilitiesApplication', description: t('seo.description'), inLanguage: locale, url: `https://key-recorder.com/${locale}/`, downloadUrl: releaseUrl, offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } },
   ]
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
 }
 
+function CSVExample({ locale }: { locale: Locale }) {
+  const { t } = useTranslation(undefined, { lng: locale })
+  return <div className="observation-sheet">
+    <table>
+      <caption>{t('home.example.caption')}</caption>
+      <thead><tr><th scope="col">{t('home.example.csv.interval')}</th><th scope="col">{t('home.protocol.keyA')}</th><th scope="col">{t('home.protocol.keyB')}</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">0s – 30s</th><td>12.450</td><td>4.200</td></tr>
+        <tr><th scope="row">30s – 60s</th><td>8.100</td><td>10.000</td></tr>
+      </tbody>
+      <tfoot><tr><th scope="row">TOTAL</th><td>20.550</td><td>14.200</td></tr></tfoot>
+    </table>
+  </div>
+}
+
 function HomePage({ locale }: { locale: Locale }) {
-  const { t } = useTranslation()
-  const features = [1, 2, 3].map((number) => ({ title: t(`home.features.${number}.title`), body: t(`home.features.${number}.body`) }))
+  const { t } = useTranslation(undefined, { lng: locale })
   return <>
-    <section className="hero section-shell"><div className="hero-copy"><p className="eyebrow"><span className="eyebrow-line" />{t('home.eyebrow')}</p><h1>{t('home.hero.title')} <em>{t('home.hero.emphasis')}</em></h1><p className="hero-intro">{t('home.hero.body')}</p><div className="hero-actions"><a className="button button-primary" href={releaseUrl} target="_blank" rel="noreferrer">{t('home.hero.cta')} <span>↗</span></a><Link className="text-link" to={`/${locale}/researchers/`}>{t('home.hero.secondary')} <span>↓</span></Link></div><p className="micro-note"><span className="apple-dot">●</span>{t('home.hero.requirement')}</p></div><figure className="hero-screenshot"><div className="screenshot-frame"><img src={`${import.meta.env.BASE_URL}screenshots/key-recorder-configuration.png`} alt={t('home.screenshot.alt')} /></div><figcaption><img src={`${import.meta.env.BASE_URL}key-recorder-icon.png`} alt="" /><span>{t('home.screenshot.caption')}</span></figcaption></figure></section>
-    <section className="statement-band"><div className="section-shell band-inner"><p>{t('home.statement')}</p><span className="band-arrow">↓</span></div></section>
-    <section className="section-shell feature-section"><div className="section-heading"><p className="eyebrow"><span className="eyebrow-line" />{t('home.featuresEyebrow')}</p><h2>{t('home.featuresTitle')}</h2></div><div className="feature-grid">{features.map((feature, index) => <article className="feature-card" key={feature.title}><div className={`feature-number feature-number-${index + 1}`}>0{index + 1}</div><h3>{feature.title}</h3><p>{feature.body}</p></article>)}</div></section>
-    <section className="section-shell use-case-section"><div className="section-heading"><p className="eyebrow"><span className="eyebrow-line" />{t('useCases.homeEyebrow')}</p><h2>{t('useCases.homeTitle')}</h2></div><div className="use-case-grid"><Link className="use-case-card" to={`/${locale}/use-cases/behavioral-observation/`}><span className="feature-number">01</span><h3>{t('useCases.observation.title')}</h3><p>{t('useCases.observation.intro')}</p><span className="text-link">{t('useCases.readMore')} ↗</span></Link><Link className="use-case-card" to={`/${locale}/use-cases/csv-export/`}><span className="feature-number feature-number-2">02</span><h3>{t('useCases.csv.title')}</h3><p>{t('useCases.csv.intro')}</p><span className="text-link">{t('useCases.readMore')} ↗</span></Link></div></section>
-    <section className="section-shell observation-section"><div className="observation-copy"><p className="eyebrow"><span className="eyebrow-line" />{t('home.example.eyebrow')}</p><h2>{t('home.example.title')}</h2><p>{t('home.example.body')}</p><Link className="text-link" to={`/${locale}/researchers/`}>{t('home.example.link')} <span>↗</span></Link></div><div className="observation-sheet"><div className="sheet-label">PROTOCOL / 2026–A</div><div className="sheet-rule" /><div className="sheet-row sheet-head"><span>{t('home.example.csv.interval')}</span><span>FOOD DISPENSER</span><span>LEVER</span></div><div className="sheet-row"><span>0s – 30s</span><span className="measure-coral">12.450</span><span className="measure-blue">4.200</span></div><div className="sheet-row"><span>30s – 60s</span><span className="measure-coral">8.100</span><span className="measure-blue">10.000</span></div><div className="sheet-rule" /><div className="sheet-row sheet-total"><span>TOTAL</span><span>20.550</span><span>14.200</span></div><p className="sheet-caption">{t('home.example.caption')}</p></div></section>
-    <section className="download-band"><div className="section-shell download-inner"><div><p className="eyebrow eyebrow-light"><span className="eyebrow-line" />{t('home.download.eyebrow')}</p><h2>{t('home.download.title')}</h2></div><a className="button button-light" href={releaseUrl} target="_blank" rel="noreferrer">{t('home.download.cta')} <span>↗</span></a></div></section>
+    <section className="hero section-shell">
+      <div className="hero-copy">
+        <h1>{t('home.hero.title')}<br />{t('home.hero.emphasis')}</h1>
+        <div className="hero-description">
+          <p className="hero-intro">{t('home.hero.body')}</p>
+          <div className="hero-actions"><Link className="button button-primary" to={`/${locale}/download/`}>{t('home.hero.cta')}</Link><Link className="text-link" to={`/${locale}/researchers/`}>{t('home.hero.secondary')}</Link></div>
+          <p className="micro-note">{t('home.hero.requirement')}</p>
+        </div>
+      </div>
+      <ul className="product-facts" role="list"><li>{t('common.keys')}</li><li>{t('common.local')}</li><li>{t('common.format')}</li></ul>
+      <figure className="hero-screenshot">
+        <a className="screenshot-frame" href={screenshotUrl} target="_blank" rel="noreferrer" aria-label={t('common.enlarge')}><img src={screenshotUrl} alt={t('home.screenshot.alt')} width="1175" height="768" fetchPriority="high" /></a>
+        <figcaption>{t('home.screenshot.caption')}</figcaption>
+      </figure>
+    </section>
+    <section className="section-shell feature-section" aria-labelledby="workflow-title">
+      <h2 id="workflow-title">{t('home.featuresTitle')}</h2>
+      <ol className="workflow-steps" role="list">{[1, 2, 3].map((step) => <li key={step}><span className="step-number" aria-hidden="true">{step}</span><h3>{t(`home.features.${step}.title`)}</h3><p>{t(`home.features.${step}.body`)}</p></li>)}</ol>
+    </section>
+    <section className="data-section">
+      <div className="section-shell observation-section"><div className="observation-copy"><h2>{t('home.example.title')}</h2><p>{t('home.example.body')}</p><Link className="text-link" to={`/${locale}/use-cases/csv-export/`}>{t('useCases.csv.title')}</Link></div><CSVExample locale={locale} /></div>
+    </section>
+    <section className="section-shell use-case-section" aria-labelledby="use-cases-title">
+      <h2 id="use-cases-title">{t('useCases.homeTitle')}</h2>
+      <div className="use-case-list">{(['observation', 'csv'] as const).map((page) => <article key={page}><h3><Link to={`/${locale}/use-cases/${page === 'observation' ? 'behavioral-observation' : 'csv-export'}/`}>{t(`useCases.${page}.title`)}</Link></h3><p>{t(`useCases.${page}.intro`)}</p></article>)}</div>
+    </section>
+    <section className="download-band"><div className="section-shell download-inner"><h2>{t('home.download.title')}</h2><div><Link className="button button-light" to={`/${locale}/download/`}>{t('home.hero.cta')}</Link><p>{t('home.hero.requirement')}</p></div></div></section>
   </>
 }
 
-function InformationPage({ locale, page }: { locale: Locale; page: 'researchers' | 'privacy' | 'download' }) {
-  const { t } = useTranslation()
-  const sections = page === 'researchers' ? ['prepare', 'record', 'read'] : page === 'privacy' ? ['local', 'permissions', 'limits'] : ['requirements', 'install', 'release']
-  return <section className="section-shell info-page"><p className="eyebrow"><span className="eyebrow-line" />{t(`${page}.eyebrow`)}</p><h1>{t(`${page}.title`)}</h1><p className="info-lead">{t(`${page}.intro`)}</p><div className="info-list">{sections.map((section, index) => <article key={section} className="info-item"><div className="info-index">0{index + 1}</div><div><h2>{t(`${page}.${section}.title`)}</h2><p>{t(`${page}.${section}.body`)}</p>{page === 'download' && section === 'release' && <a className="text-link" href={releaseUrl} target="_blank" rel="noreferrer">{t('download.release.link')} ↗</a>}</div></article>)}</div><Link className="button button-dark info-button" to={`/${locale}/`}>{t('common.backHome')}</Link></section>
+type InformationPageKey = 'researchers' | 'privacy' | 'download' | 'observation' | 'csv'
+const informationSections = {
+  researchers: ['prepare', 'record', 'read'],
+  privacy: ['local', 'permissions', 'limits'],
+  download: ['requirements', 'install', 'release'],
+  observation: ['sections.1', 'sections.2', 'sections.3'],
+  csv: ['sections.1', 'sections.2', 'sections.3'],
 }
 
-function UseCasePage({ locale, page }: { locale: Locale; page: 'observation' | 'csv' }) {
-  const { t } = useTranslation()
-  const sections = [1, 2, 3]
-  return <section className="section-shell info-page use-case-page"><p className="eyebrow"><span className="eyebrow-line" />{t(`useCases.${page}.eyebrow`)}</p><h1>{t(`useCases.${page}.title`)}</h1><p className="info-lead">{t(`useCases.${page}.intro`)}</p><div className="info-list">{sections.map((section) => <article key={section} className="info-item"><div className="info-index">0{section}</div><div><h2>{t(`useCases.${page}.sections.${section}.title`)}</h2><p>{t(`useCases.${page}.sections.${section}.body`)}</p></div></article>)}</div><Link className="button button-dark info-button" to={`/${locale}/download/`}>{t(`useCases.${page}.cta`)}</Link></section>
+function InformationPage({ locale, page }: { locale: Locale; page: InformationPageKey }) {
+  const { t } = useTranslation(undefined, { lng: locale })
+  const prefix = page === 'observation' || page === 'csv' ? `useCases.${page}` : page
+  return <section className="section-shell info-page">
+    <Link className="text-link back-link" to={`/${locale}/`}>{t('common.backHome')}</Link>
+    <h1>{t(`${prefix}.title`)}</h1>
+    <p className="info-lead">{t(`${prefix}.intro`)}</p>
+    {page === 'download' && <div className="download-details"><a className="button button-primary" href={releaseUrl}>{t('common.download')}</a><p>{t('common.downloadNote')}</p></div>}
+    <div className="info-list">{informationSections[page].map((section) => <article key={section} className="info-item"><h2>{t(`${prefix}.${section}.title`)}</h2><p>{t(`${prefix}.${section}.body`)}</p></article>)}</div>
+    {page === 'csv' && <CSVExample locale={locale} />}
+    {page !== 'download' && <Link className="button button-primary info-button" to={`/${locale}/download/`}>{t('home.hero.cta')}</Link>}
+  </section>
 }
 
 function LanguageLanding() {
-  const { t } = useTranslation()
-  const navigate = useNavigate()
-  return <main className="language-landing"><div className="landing-card"><img className="brand-mark" src={`${import.meta.env.BASE_URL}key-recorder-icon.png`} alt="" /><p className="eyebrow">KEY RECORDER / SELECT LANGUAGE</p><h1>{t('landing.title')}</h1><div className="landing-options">{locales.map((locale) => <button key={locale} type="button" onClick={() => navigate(`/${locale}/`)}><span>{locale === 'en' ? 'English' : locale === 'fr' ? 'Français' : 'Italiano'}</span><span>↗</span></button>)}</div></div></main>
+  return <main className="language-landing" id="main-content" tabIndex={-1}><div className="landing-card">
+    <div className="brand"><AppIcon /><span translate="no">Key Recorder</span></div>
+    <h1>Choose your language</h1>
+    <nav className="landing-options" aria-label="Language">{locales.map((locale) => <Link key={locale} to={`/${locale}/`} lang={locale} hrefLang={locale}>{languageNames[locale]}</Link>)}</nav>
+  </div></main>
 }
 
-function LocalizedSite() {
-  const locale = useSiteMeta()
-  return <><Header locale={locale} /><StructuredData locale={locale} /><main><Routes><Route path="/" element={<HomePage locale={locale} />} /><Route path="/researchers/" element={<InformationPage locale={locale} page="researchers" />} /><Route path="/privacy/" element={<InformationPage locale={locale} page="privacy" />} /><Route path="/download/" element={<InformationPage locale={locale} page="download" />} /><Route path="/use-cases/behavioral-observation/" element={<UseCasePage locale={locale} page="observation" />} /><Route path="/use-cases/csv-export/" element={<UseCasePage locale={locale} page="csv" />} /><Route path="*" element={<HomePage locale={locale} />} /></Routes></main><Footer locale={locale} /></>
+function LocalizedSite({ locale }: { locale: Locale }) {
+  const { t } = useTranslation(undefined, { lng: locale })
+  return <>
+    <a className="skip-link" href="#main-content">{t('common.skip')}</a>
+    <Header locale={locale} /><StructuredData locale={locale} />
+    <main id="main-content" tabIndex={-1}><Routes>
+      <Route path="/" element={<HomePage locale={locale} />} />
+      <Route path="/researchers/" element={<InformationPage locale={locale} page="researchers" />} />
+      <Route path="/privacy/" element={<InformationPage locale={locale} page="privacy" />} />
+      <Route path="/download/" element={<InformationPage locale={locale} page="download" />} />
+      <Route path="/use-cases/behavioral-observation/" element={<InformationPage locale={locale} page="observation" />} />
+      <Route path="/use-cases/csv-export/" element={<InformationPage locale={locale} page="csv" />} />
+      <Route path="*" element={<HomePage locale={locale} />} />
+    </Routes></main><Footer locale={locale} />
+  </>
 }
 
 export default function App() {
-  return <Routes><Route path="/" element={<LanguageLanding />} /><Route path="/:locale/*" element={<LocalizedSite />} /></Routes>
+  const locale = useSiteMeta()
+  return <Routes><Route path="/" element={<LanguageLanding />} /><Route path="/:locale/*" element={<LocalizedSite locale={locale} />} /></Routes>
 }
